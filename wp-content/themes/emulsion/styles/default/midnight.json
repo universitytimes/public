@@ -1,0 +1,39 @@
+{
+    "version": 2,
+    "title": "Midnight",
+    "settings": {
+        "custom": {
+            "color": {
+                "scheme": "midnight",
+                "comments-bg": "rgba(255,255,255,.15)",
+                "relate-posts-bg": "rgba(255,255,255,.1)",
+                "featured-image-bg": "rgba(255,255,255,.1)",
+                "code-tag-bg": "#364549",
+                "code-tag-text": "#1bff4a",
+                "stripe": "rgba(255,255,255,.1)",
+                "toc-bg": "#364549",
+                "button-bg": "#000000",
+                "button-text": "#cccccc",
+                "unknown-bg": "#f8f8ff",
+                "dark-mode-bg": "#1b262c",
+                "palette-base": "#1b262c",
+                "palette-contrast": "#ffffff",
+                "palette-primary": "#aaaaaa",
+                "palette-secondary": "#728603",
+                "palette-tertiary": "#8ea729",
+                "palette-complementary": "#2C211B",
+                "palette-base-banner": "#000000",
+                "palette-base-sidebar": "#162027",
+                "palette-base-menu-primary": "#223333",
+                "palette-contrast-banner": "#eeeeee",
+                "palette-contrast-sidebar": "#eeeeee",
+                "palette-contrast-menu-primary": "#eeeeee",
+                "palette-border-color": "#888"
+            },
+            "border": {
+                "common": "var(--wp--custom--border--common-width) var(--wp--custom--border--common-style) var(--wp--preset--color--border-color)"
+            }
+
+        }
+    }
+}

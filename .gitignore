@@ -1,0 +1,31 @@
+# --- Environment-specific / secrets — never commit ---
+wp-config.php
+.env
+.env.*
+
+# --- Uploaded media — large binaries, syncs separately from code ---
+wp-content/uploads/
+
+# --- Caching, temp files, and DB export dumps ---
+wp-content/cache/
+wp-content/boost-cache/
+wp-content/upgrade/
+wp-content/backup*/
+wp-content/ai1wm-backups/
+wp-content/**/*.sql
+*.log
+
+# --- File Manager Advanced plugin storage — admin-uploaded files, not code ---
+wp-content/plugins/file-manager-advanced/application/library/files/*
+!wp-content/plugins/file-manager-advanced/application/library/files/.gitkeep
+
+# --- Forensic/quarantine material — should never enter version control history ---
+.sucuriquarantine/
+
+# --- OS and editor junk ---
+.DS_Store
+Thumbs.db
+
+# --- Dependency directories, if you ever add build tooling ---
+node_modules/
+vendor/

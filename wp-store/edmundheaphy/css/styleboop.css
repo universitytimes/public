@@ -1,0 +1,122 @@
+@font-face {
+    font-family: 'oxygen_monoregular';
+    src: url('../fonts/oxygenmono-regular-webfont.woff2') format('woff2'),
+         url('../fonts/oxygenmono-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    
+
+}
+
+
+body {
+	
+	
+	font-family: 'oxygen_monoregular', sans-serif;
+	background: #2babee;
+	padding: 20px;
+	font-size: 14px;
+}
+
+a {
+	
+	color: black;
+	text-decoration: underline;
+	display: inline-block;
+	
+}
+
+a:hover {
+	
+	color: black;
+	text-decoration: none;
+	
+}
+
+
+#maincontainer {
+	
+	width: 100%;
+	min-height: 500px;
+	background: white;
+	-webkit-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.10);
+	-moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.10);
+	box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.10);
+	padding: 22px 33px 22px 33px;
+	box-sizing: border-box;
+}
+
+h1 {
+	
+	font-size: 23px;
+	text-transform: uppercase;
+	font-weight: normal;
+	
+	
+}
+
+h3 {
+	
+	font-size: 17px;
+	text-transform: uppercase;
+	font-weight: normal;
+	margin-top: 30px;
+
+}
+
+
+.intro {
+	
+	margin-top: 30px;
+	font-size: 14px;
+	line-height: 200%;
+	color: #8d8d8d;
+	
+}
+
+.intro strong {
+	
+	font-weight: normal;
+	color: #000;
+	
+}
+
+
+ul {
+	
+	margin: 0px;
+	padding: 0px;
+	line-height: 200%;
+	
+}
+
+
+ul li {
+	
+	color: #8d8d8d;
+	 list-style-type: none; list-style-position:inside; margin:0px 0px 12px 0px; padding:0; 
+	 line-height: 200%;
+	
+}
+
+
+ul li a {
+	
+	color: black;
+	text-decoration: underline;
+	display: inline-block;
+	padding-right: 4px;
+	
+}
+
+ul li a:hover {
+	
+	color: black;
+	text-decoration: none;
+	
+}
+
+
+
+
+

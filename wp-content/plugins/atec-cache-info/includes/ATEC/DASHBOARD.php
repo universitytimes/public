@@ -1,0 +1,474 @@
+<?php
+namespace ATEC;
+defined('ABSPATH') || exit;
+
+use ATEC\INIT;
+use ATEC\FS;
+use ATEC\GROUP;
+use ATEC\TOOLS;
+
+final class DASHBOARD {
+	
+private static function render_on_off_button($fill, $isOn = true)
+{
+	echo '
+	<div class="atec-badge-icon">
+		<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+			<circle cx="32" cy="32" r="32" fill="', esc_attr($fill), '" />';
+	
+	if ($isOn) {
+		echo '
+			<path d="M32 8v24" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+			<path d="M20 20a16 16 0 1 0 24 0" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>';
+	} 
+	else {
+		// Dismissed-style X
+		echo '
+			<line x1="20" y1="20" x2="44" y2="44" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+			<line x1="44" y1="20" x2="20" y2="44" stroke="#fff" stroke-width="6" stroke-linecap="round"/>';
+	}
+
+	echo '
+		</svg>
+	</div>';
+}
+
+private static function group_badge($str='', $ok=true, $slug = '', $nav= '', $warn=false): void
+{
+	if ($str==='' && in_array($slug, ['wpfd','wprt']))
+	{
+		echo '<span style="color:#aaa;">·/·</span>';
+		return;
+	}
+
+	$url = INIT::build_url($slug, '', $nav);
+	$on_demand = $str==='' || $str==='NC';
+
+	$bg				= $on_demand ? '#fafafa' : ($ok ? '#e9f9ec' : ( $warn ? '#fffafa' : '#fbe9e9' ));			// soft background
+	$border		= $on_demand ? '#ddd' : ($ok ? '#b4e2c1' : ( $warn ? '#edd' : '#e2b4b4' ));				// gentle border
+	$color	 		= $on_demand ? '#bbb' : ($ok ? '#2ebb71' : ( $warn ? '#a99' : '#bb2e2e' ));				// readable text
+	$btnColor  	= $on_demand ? '#bbb' : ($ok ? '#00cc00' : ( $warn ? '#bbb' : '#cc0000' ));				// bold icon
+	
+	echo '
+	<div class="atec-dilb atec-vat">
+		<a href="' . esc_url($url) . '" class="atec-nodeco">
+			<div class="atec-badge" style="background:', esc_attr($bg), '; border:1px solid ', esc_attr($border), '; border-radius:4px; padding: 1px 4px 1px 4px;">';
+				echo '<div class="atec-badge-icon"', $on_demand ? ' style="margin-left: -5px; width: 0;"' : '', '>'; 
+				if ($on_demand) echo '';
+				else self::render_on_off_button($btnColor, $ok, $warn);
+				echo '</div>';
+
+				if ($on_demand) $str = $str==='' ? 'On demand' : 'Always on';
+				echo '<div style="color:', esc_attr($color), '">', esc_html($str), '</div>';
+				
+				if ($warn)
+				{
+					echo '<div class="atec-dilb" style="background:#', $ok ? 'f9c9cc' : 'c9f9cc', '; border-top-right-radius:2px; border-bottom-right-radius:2px; height:100%; margin-right: -3px; padding: 0 2px 0 3px;">';
+					if ($ok) 	echo ' <span title="Turn off for production!">‼️</span>';
+					else echo ' <span title="Leave off for production!">❇️</span>';
+					echo '</div>';
+				}
+				
+			echo
+			'</div>',
+		'</a>',
+	'</div>';
+}
+
+private static function plugin_div($p)
+{
+	echo
+	'<div class="atec-badge-row">';
+	
+	switch ($p->name)
+	{
+		case 'anti-spam':
+			self::group_badge('Anti SPAM', true, $p->slug , 'Settings', false);
+			break;
+
+		case 'backup':
+			$settings = INIT::get_settings('wpb');
+			$active = INIT::bool($settings['automatic'] ?? 0);
+			self::group_badge('Automatic', $active, $p->slug, 'Settings', false);
+			break;
+
+		case 'banner':
+			self::group_badge('Banner', INIT::get_settings('wpbn', 'active'), $p->slug);
+			break;
+			
+		case 'bot-shield':
+			self::group_badge('Bot Shield', INIT::get_settings('wpbs', 'active'), $p->slug);
+			break;			
+
+		case 'bunny':
+			self::group_badge('CDN Zone', INIT::get_settings('wpbu', 'zone') !== '', $p->slug);
+			break;
+
+		case 'cache-apcu':
+			$settings = INIT::get_settings('wpca');
+			$o_cache = INIT::bool($settings['o_cache'] ?? 0);
+			$p_cache = INIT::bool($settings['p_cache'] ?? 0);
+			self::group_badge('Object Cache', $o_cache, $p->slug);
+			self::group_badge('Page Cache', $p_cache, $p->slug);
+			break;
+
+		case 'cache-memcached':
+			self::group_badge('Object Cache', defined('ATEC_OC_ACTIVE_MEMCACHED'), $p->slug);
+			break;
+
+		case 'cache-redis':
+			self::group_badge('Object Cache', defined('ATEC_OC_ACTIVE_REDIS'), $p->slug);
+			break;
+			
+		case 'chat-sessions':
+			self::group_badge('Active', INIT::get_settings('wpcs','active'), $p->slug);
+			break;
+
+		case 'config':
+			$settings = INIT::get_settings('wpco');
+			$active = !empty($settings);
+			self::group_badge('Config', $active, $p->slug);
+			break;
+
+		case 'database':
+			self::group_badge('Transitions', INIT::get_settings('wpdb','auto_timedout'), $p->slug);
+			break;
+
+		case 'debug':
+			self::group_badge('DEBUG', defined('WP_DEBUG') && WP_DEBUG, $p->slug, 'Debug', true);
+			self::group_badge('D_DISPLAY', defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY, $p->slug, 'Debug', true);
+			self::group_badge('D_LOG', defined('WP_DEBUG_LOG') && WP_DEBUG_LOG, $p->slug,'Debug',true);
+			self::group_badge('SAVEQUERIES', defined('SAVEQUERIES') && SAVEQUERIES, $p->slug,'Queries',true);
+			break;
+
+		case 'deploy':
+			self::group_badge('Auto deploy', INIT::get_settings('wpdp', 'auto'), $p->slug);
+			break;
+
+		case 'developer':
+			self::group_badge('Console', INIT::get_settings('wpdv', 'console'), $p->slug, '', true);
+			break;
+
+		case 'duplicate-page-post':
+			self::group_badge('Active', true, $p->slug);
+			break;
+
+		case 'foxyfy':
+			self::group_badge('Active', INIT::get_settings('wpff','active'), $p->slug);
+			break;
+
+		case 'hook-inspector':
+			self::group_badge('Logging', INIT::get_settings('wphi', 'active'), $p->slug,'',true);
+			break;
+
+		case 'limit-login':
+			self::group_badge('Protected', true, $p->slug, '', false);
+			break;
+
+		case 'login-url':
+			self::group_badge('Custom URL', INIT::get_settings('wplu', 'url') !== '', $p->slug,'Settings');
+			break;
+
+		case 'maintenance-mode':
+			self::group_badge('Maintenance', INIT::get_settings('wpmtm', 'active'), $p->slug);
+			break;
+
+		case 'mega-cache':
+			self::group_badge('Page Cache', INIT::get_settings('wpmc', 'cache'), $p->slug,'Settings');
+			break;
+
+		case 'profiler':
+			$settings = INIT::get_settings('wppr');
+			self::group_badge('Profiler',INIT::bool($settings['processes'] ?? 0), $p->slug,'Processes',true);
+			self::group_badge('PP Profiler',INIT::bool($settings['pages'] ?? 0), $p->slug,'Pages',true);
+			break;
+
+		case 'stats':
+			self::group_badge('Active', true, $p->slug, '', false);
+			break;
+
+		case 'smtp-mail':
+			self::group_badge('Settings tested', INIT::get_settings('wpsm', 'mail_tested'), $p->slug, 'Settings');
+			break;
+
+		case 'temp-admin':
+			self::group_badge('', true, $p->slug);
+			break;
+
+		case 'webp':
+			self::group_badge('Conversion', INIT::get_settings('wpwp','active'), $p->slug);
+			break;
+
+		case 'flush-debug':
+		case 'lazy-load':
+		case 'minify':
+		case 'svg':
+		case 'runtime':
+			self::group_badge('NC', true, $p->slug);
+			break;
+			
+		default:
+			self::group_badge('', true, $p->slug);
+			break;
+	}
+
+	echo
+	'</div>';
+}
+
+private static function load_style()
+{
+	TOOLS::reg_inline_style('dashboard',
+		'.atec-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 2px 4px; margin: 0; border-radius: 4px; }
+		.atec-badge-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; order:0; }
+		.atec-badge-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
+		.atec-badge > div { display: inline; }
+		.dashicons { width:20px; height:20px; }
+		.atec-page A.button { border-color: #e0e0e0 !important; background: #f6f6f6; }
+		.atec-page .button { min-width: 24px !important; min-height: 24px !important; }
+		.atec-pro, .atec-free { align-self: start; margin-left: -5px; font-size: 10px; }
+		');
+}
+
+private static function block_start($min_height=20, $min_width=255)
+{ echo '<div class="atec-dilb atec-box-white atec-vat" style="max-width: 255px; min-width: ', esc_attr($min_width), 'px; min-height: ', esc_attr($min_height), 'px; margin: 0 5px 5px 5px; padding: 5px 5px 0 5px;">'; }
+
+private static function block_end()
+{ echo '</div>'; }
+
+private static function border_block_start()
+{ echo '<div class="atec-db atec-border atec-mb-10">'; }
+
+private static function row_start($padding='0 5px')
+{ echo '<div class="atec-row atec-mb-5" style="padding: ', esc_attr($padding), '; align-items: center;">'; }
+
+private static function row_end()
+{ echo '</div>'; }
+
+private static function pro_or_free($a)
+{
+	if ($a->pro === 'PRO') echo '<div class="atec-pro">PRO</div>';
+	else if ($a->pro === 'FREE') echo '<div class="atec-free">FREE</div>';
+}
+
+public static function init($plugin)
+{
+	self::load_style();
+	TOOLS::flush();
+
+	$una = TOOLS::una(__DIR__);
+
+	$atec_group_arr = GROUP::all_plugins();
+	$una = TOOLS::una(__DIR__);
+
+	$integrity = TOOLS::clean_request('integrity', 'atec_group_nonce');
+	if ($integrity !== '')
+	{
+		$integrity_bool = $integrity === 'true';
+		$integrityString= 'Thank you. Connection to atecplugins.com is '.($integrity_bool ? 'active' : 'disabled');
+		if ($integrity_bool) INIT::integrity_check($plugin);
+		update_option('atec_allow_integrity_check', $integrity_bool ? true : 'false');
+	}
+	else $integrityString = '';
+
+	$installed = [];
+	$not_installed = [];
+	$active = [];
+	$active_plugins = get_option( 'active_plugins' );
+
+	$show_active = true;
+	$show_passive = false;
+	
+	foreach ($atec_group_arr as $a)
+	{
+		$prefix = INIT::plugin_prefix($a->name);
+		$plugin = $prefix.$a->name;
+		$is_installed = FS::exists(INIT::plugin_dir($plugin));
+
+		if ($is_installed) 
+		{
+			$installed[$a->name] = $plugin;
+			$plugin_file = $plugin . '/' . $plugin . '.php';
+			$is_active = in_array($plugin_file, $active_plugins, true);
+			$active[$a->name] = $is_active;
+			$show_active = $show_active || $is_active;
+			$show_passive = $show_passive || !$is_active;
+		}
+		else $not_installed[$a->name] = $plugin;
+	}
+
+	echo
+	'<div class="atec-page">',
+		'<div class="atec-main">',
+			'<div class="atec-g">';
+
+				echo
+				'<div class="atec-dilb atec-head atec-m-auto atec-mb-20">',
+					'<h3 class="atec-mt-0 atec-mb-5">';
+						\ATEC\SVG::echo('wpa');
+						echo
+						'&nbsp;atec Plugins · Dashboard',
+					'</h3>',
+				'</div>';
+
+				if ($integrityString!== '') { echo '<div class="atec-db atec-center atec-mb-10">'; TOOLS::msg($integrity_bool,$integrityString); echo '</div>'; }
+
+				if ($show_active)
+				{
+					TOOLS::h(3,'🟢 Active plugins');
+					self::border_block_start();
+
+						foreach ($atec_group_arr as $a)
+						{
+							if (!isset($installed[$a->name])) continue;
+							if (!$active[$a->name]) continue;
+	
+							$plugin = $installed[$a->name];
+	
+							$fixed_name = INIT::plugin_fixed_name($a->name);
+							self::block_start(75, $a->name === 'debug' ? 520 : 255);
+								
+								self::row_start();
+									
+									\ATEC\SVG::echo($a->slug);
+									if ($active)
+									{
+										$href = INIT::build_url($a->slug);
+										echo '<a class="atec-nodeco" href="', esc_url($href) ,'">', esc_attr($fixed_name), '</a>';
+										self::pro_or_free($a);
+									}
+	
+								self::row_end();
+								
+								echo
+								'<hr>',
+								'<div style="padding: 0 5px;">';
+									self::plugin_div($a);
+								echo
+								'</div>';
+								
+							self::block_end();
+						}
+						
+					self::block_end();
+				}
+	
+				if ($show_passive)
+				{
+					TOOLS::h(3,'🟡 Paused plugins');
+
+					self::border_block_start();
+					
+						foreach ($atec_group_arr as $a)
+						{
+							if (!isset($installed[$a->name])) continue;
+							if ($active[$a->name]) continue;
+							
+							$fixed_name = INIT::plugin_fixed_name($a->name);
+							self::block_start();
+								
+								self::row_start(0);
+									\ATEC\SVG::echo($a->slug);
+									echo esc_attr($fixed_name);
+									self::pro_or_free($a);
+								self::row_end();
+								
+							self::block_end();
+						}
+						
+					self::block_end();
+				}
+				
+				if (!isset($installed['foxyfy']))
+				{
+					TOOLS::h(3,'💯 Our latest plugin');
+					echo
+					'<div class="atec-db atec-border atec-mb-10">
+						<div class="atec-dilb atec-box-white atec-vat" style="margin: 0 auto; padding: 5px 5px 0 5px;">
+							<div class="atec-row atec-mb-5" style="padding: 0 5px; align-items: center; color: #f47218; font-weight: 600;">
+								🦊 FoxyFy <div class="atec-pro">PRO</div>
+								<div class="atec-row-right">
+									<a title="Download from atecplugins.com" class="atec-nodeco button button-secondary atec-btn-small" href="https://atecplugins.com/WP-Plugins/atec-foxyfy.zip" download=""><span class="dashicons dashicons-download"></span></a>
+								</div>
+							</div>
+							<hr>
+							<div style="padding: 0 5px 10px 5px;">Exclusive WordPress plugin to deliver your site worldwide using the all-new FoxyFy Content Delivery Network (CDN).</div>
+						</div>
+					</div>';
+				}
+				
+				if (!empty($not_installed))
+				{
+					TOOLS::h(3,'🔵 Available plugins');
+
+					self::border_block_start();
+					
+						$atecplugins = 'https://atecplugins.com/';
+						$megacache = 'https://wpmegacache.com/';
+						$license_ok = INIT::license_ok();
+						$isDevMode = INIT::is_atec_dev_mode();
+
+						foreach ($atec_group_arr as $a)
+						{
+							if (!isset($not_installed[$a->name])) continue;
+							if (!$isDevMode && $a->name==='chat-sessions') continue;
+
+							$href = 
+								$a->wp
+								? 'https://wordpress.org/plugins/'.$not_installed[$a->name].'/'
+								:( $a->name ==='mega-cache' ? $megacache : $atecplugins);
+					
+							self::block_start();
+
+								self::row_start();
+									\ATEC\SVG::echo($a->slug);
+									echo
+									'<a class="atec-nodeco" href="', esc_url($href) ,'" target="_blank">', esc_attr(INIT::plugin_fixed_name($a->name)), '</a>';
+									self::pro_or_free($a);
+									$p = INIT::plugin_prefix($a->name).$a->name;
+									echo
+									'<div class="atec-row-right">';
+										if ($license_ok || $a->pro !== 'PRO')
+										{
+											echo 
+											'<a title="Download from atecplugins.com" class="atec-nodeco button button-secondary atec-btn-small" ',
+												'href="', esc_url($atecplugins), 'WP-Plugins/', esc_attr($p), '.zip" download>',
+												'<span class="', esc_attr(TOOLS::dash_class('download')), '"></span>',
+											'</a>';
+										}
+										else echo '<a class="atec-nodeco button atec-btn-small" style="visibility:hidden;"></a>';
+									echo 
+									'</div>';
+								self::row_end();
+								
+								echo
+								'<hr>',
+								'<div style="padding: 0 5px 10px 5px;">', 
+									esc_html($a->desc), '.',
+								'</div>';
+	
+							self::block_end();
+						}
+						
+					self::block_end();
+				}
+
+				echo
+				'<center>
+					<p class="atec-fs-12" style="max-width:80%; line-height: 1.4em;">
+						Optimized for speed, size, and minimal CPU footprint.<br>
+						Adds under <strong>0.2&nbsp;<small>ms</small></strong> per plugin — native PHP, zero bloat.<br>
+						Tested across Linux, Windows, macOS — Apache, NGINX, LiteSpeed and 🦊 <b>FoxyFy</b>.
+					</p>
+					<a class="atec-nodeco atec-center button" href="https://de.wordpress.org/plugins/search/atec/" target="_blank">View all atec Plugins in the WordPress directory.</a>
+				</center>';
+
+				echo '
+			</div>
+		</div>
+	</div>';
+
+}
+
+}
+?>

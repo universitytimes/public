@@ -1,0 +1,837 @@
+/**
+ * Sanitize and encode all HTML in a user-submitted string to prevent XSS
+ * https://portswigger.net/web-security/cross-site-scripting/preventing
+ * @param  {String} str  The user-submitted string
+ * @return {String} str  The sanitized string
+ */
+var sanitizeHTML = function (str) {
+    if (str === undefined) {
+        return str;
+    }
+    // allowed characters: letters, numbers, colon, backslash, question mark, dash, equals, ampersand
+    return str.replace(/[^\w\d:\/\?\-=.& ]/gi, function (c) {
+        return '&#' + c.charCodeAt(0) + ';';
+    });
+};
+
+// wp.i18n wrapper w/ graceful fallback
+var __ = (typeof wp !== 'undefined' && wp.i18n && wp.i18n.__) ? wp.i18n.__ : function(s) { return s; };
+
+var interval = false;
+
+jQuery(window).on("load", function(){
+    let url = sanitizeHTML(jQuery("#verify-account-url").val());
+    if (url) {
+        tb_show('Verify Blubrry Account', url + '&KeepThis=true&TB_iframe=true&width=600&height=400&modal=true', false);
+        jQuery('#adminmenuwrap, #adminmenuwrap > *, #wpadminbar, #wpadminbar > *').css('z-index', '200000');
+        let height = jQuery('#wpwrap').height();
+        jQuery('#TB_overlay').css('height', height.toString() + 'px');
+        jQuery('body.modal-open').css('overflow-y', 'scroll');
+        jQuery('#TB_window, #TB_window iframe').css('height', '400px');
+        jQuery('#TB_window, #TB_window iframe').css('width', '800px');
+        jQuery('#TB_window').css('margin-left', '-315px');
+        jQuery('#TB_window').css('margin-top', '-220px');
+        jQuery('#TB_window').css('top', '50%');
+    }
+
+    // collapse sidenav by default on mobile
+    if (jQuery(window).width() <= 768) {
+        jQuery('.pp-sidenav').addClass('pp-sidenav--collapsed');
+        jQuery('.pp-sidenav__toggle').addClass('pp-sidenav__toggle--collapsed');
+    }
+
+    return false;
+});
+
+function powerpress_toggle_lock_section(evt) {
+    if (evt.currentTarget.checked) {
+        jQuery('#pp-feed-lock-section').css('display', 'block');
+    } else {
+        jQuery('#pp-feed-lock-section').css('display', 'none');
+    }
+}
+
+function powerpress_toggle_guid_section(evt) {
+    if (evt.currentTarget.checked) {
+        jQuery('#pp-guid-override-section').css('display', 'block');
+    } else {
+        jQuery('#pp-guid-override-section').css('display', 'none');
+    }
+}
+
+function powerpress_openTab(evt, cityName) {
+    // Declare all variables
+    var tabcontent, tablinks;
+
+    let feed_slug = evt.currentTarget.id.substring(1);
+    evt.preventDefault();
+
+    let desired_tab = jQuery("#" + evt.currentTarget.id);
+    let id = "#" + cityName;
+    let desired_tab_contents = jQuery(id);
+
+    // Get all elements with class="pp-tabcontent" and hide them
+    tabcontent = jQuery('.pp-tabcontent');
+    tabcontent.each(function(index, element) {
+        //jQuery(this).css("display", "none");
+        jQuery(this).attr("class", "pp-tabcontent has-sidenav");
+    });
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = jQuery(".tablinks");
+    tablinks.each(function(index, element) {
+        jQuery(this).attr("class", "tablinks");
+
+        if(cityName.includes('diagnostics')){
+            jQuery(this).attr("class", "tablinks diagnostics-tab");
+        }
+    });
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    desired_tab_contents.attr("class", "pp-tabcontent has-sidenav active");
+    desired_tab.attr("class", "tablinks active");
+
+    // On mobile, collapse all sidenavs when switching main tabs
+    if (jQuery(window).width() <= 768) {
+        jQuery('.pp-sidenav').addClass('pp-sidenav--collapsed');
+        jQuery('.pp-sidenav__toggle').addClass('pp-sidenav__toggle--collapsed');
+        // Restore active class on any content that had to-be-active
+        jQuery('.pp-sidenav-tab.to-be-active').removeClass('to-be-active').addClass('active');
+    }
+
+    if(cityName.includes('diagnostics')){
+        desired_tab.attr("class", "tablinks diagnostics-tab active");
+    }
+
+    //Set/unset the interval for updating artwork previews
+    if (cityName == 'artwork-' + feed_slug) {
+        let el = jQuery("#powerpress_itunes_image_" + feed_slug);
+        let el_a = jQuery("#powerpress_image_" + feed_slug);
+        jQuery.merge(el, el_a);
+        if (el.length > 0) {
+            interval = setInterval(function () {
+                powerpress_insertArtIntoPreview(el[0]);
+            }, 1000);
+        }
+    }
+    if (cityName != 'artwork-' + feed_slug && interval) {
+        clearInterval(interval);
+        interval = false;
+    }
+
+    //In Settings tabs, need to set the sidenav
+    if (cityName.includes("settings")) {
+        let settingsTab = cityName.replace("settings-", "");
+        switch(settingsTab) {
+            case "welcome":
+                document.getElementById("welcome-default-open").click();
+                break;
+            case "feeds":
+                document.getElementById("feeds-default-open").click();
+                break;
+            case "website":
+                document.getElementById("website-default-open").click();
+                break;
+            case "destinations":
+                document.getElementById("destinations-default-open").click();
+                break;
+            case "analytics":
+                break;
+            case "advanced":
+                document.getElementById("advanced-default-open").click();
+                break;
+            case "other":
+                document.getElementById("other-default-open").click();
+                break;
+            case "make-money":
+                document.getElementById("make-money-default-open").click();
+                break;
+            case "live-item":
+                document.getElementById("live-item-default-open").click();
+                break;
+            case "experimental":
+                document.getElementById("experimental-default-open").click();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+function powerpress_displaySideNav(el) {
+    let tab = el.id.replace("-toggle-sidenav", "");
+    let sidenav = jQuery('#settings-' + tab + ' .pp-sidenav');
+    let isCollapsed = sidenav.hasClass('pp-sidenav--collapsed');
+
+    if (isCollapsed) {
+        // expand
+        sidenav.removeClass('pp-sidenav--collapsed');
+        el.classList.remove('pp-sidenav__toggle--collapsed');
+        let visible_tab_contents = jQuery('.pp-sidenav-tab.active');
+        visible_tab_contents.each(function(index, element) {
+            jQuery(this).removeClass('active');
+            jQuery(this).addClass('to-be-active');
+        });
+    } else {
+        // collapse
+        sidenav.addClass('pp-sidenav--collapsed');
+        el.classList.add('pp-sidenav__toggle--collapsed');
+        let visible_tab_contents = jQuery('.pp-sidenav-tab.to-be-active');
+        visible_tab_contents.each(function(index, element) {
+            jQuery(this).removeClass('to-be-active');
+            jQuery(this).addClass('active');
+        });
+    }
+}
+
+function sideNav(evt, cityName) {
+    var i, tabcontent, tablinks, tabs;
+    evt.preventDefault();
+
+    // map cross-tab links to their targets
+    const linkTargets = {
+        'pp-welcome-artwork-link': 'feeds-artwork-tab',
+        'pp-welcome-applesubmit-link': 'destinations-apple-tab',
+        'advanced-tab-seo-link': 'feeds-seo-tab'
+    };
+    let targetId = linkTargets[evt.currentTarget.id];
+    let target = targetId ? document.getElementById(targetId) : evt.currentTarget;
+
+    let desired_tab = jQuery("#" + target.id);
+    let id = "#" + cityName;
+    let desired_tab_contents = jQuery(id);
+
+    let icon = target.firstElementChild;
+
+    // on mobile, always collapse sidenav when selecting a subtab
+    let toggle_id = target.id.split("-");
+    let width = jQuery(window).width();
+    if (width <= 768) {
+        let sidenav = jQuery('#settings-' + toggle_id[0] + ' .pp-sidenav');
+        let toggle = jQuery('#' + toggle_id[0] + '-toggle-sidenav');
+        if (sidenav.length > 0) {
+            sidenav.addClass('pp-sidenav--collapsed');
+            toggle.addClass('pp-sidenav__toggle--collapsed');
+            // restore active class on content (was swapped to to-be-active)
+            jQuery('.pp-sidenav-tab.to-be-active').removeClass('to-be-active').addClass('active');
+        }
+    }
+
+    // Get all elements with class="pp-tabcontent" and hide them
+    tabcontent = jQuery(".pp-sidenav-tab");
+    tabcontent.each(function(index, element) {
+        jQuery(this).attr("class", "pp-sidenav-tab");
+    });
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tabs = jQuery(".pp-sidenav-tablinks");
+    tabs.each(function(index, element) {
+        jQuery(this).attr("class", jQuery(this).attr("class").replace('active', ''));
+    });
+
+    tablinks = document.getElementsByClassName("pp-sidenav-tablinks");
+    if (!cityName.includes("destinations")) {
+        for (i = 0; i < tablinks.length; i++) {
+            //Set any icons that are blue back to gray
+            let img_file = tablinks[i].firstElementChild.getAttribute("src");
+            if (img_file && img_file.includes("blue")) {
+                let new_img_file = img_file.replace("blue", "gray");
+                tablinks[i].firstElementChild.setAttribute("src", new_img_file);
+            }
+        }
+
+        if (cityName != "feeds-apple") {
+            //Set the selected icon to blue
+            let img_file = icon.getAttribute("src");
+            let new_img_file = img_file.replace("gray", "blue");
+            icon.setAttribute("src", new_img_file);
+        }
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    desired_tab_contents.attr("class", "pp-sidenav-tab active");
+    desired_tab.attr("class", desired_tab.attr("class") + ' active');
+
+}
+
+//Controls the three-way explicit setting switch
+function powerpress_changeExplicitSwitch(el) {
+    let id = el.id;
+    let feed_slug = id.replace("clean", "");
+    feed_slug = feed_slug.replace("explicit", "");
+    let clean = jQuery('#clean' + feed_slug);
+    clean.removeAttr("class");
+    clean.removeAttr("style");
+    let explicit = jQuery('#explicit' + feed_slug);
+    explicit.removeAttr("class");
+    explicit.removeAttr("style");
+    let select = jQuery('#pp-explicit-container' + feed_slug + ' > input');if (id.includes("clean")) {
+        clean.attr("class", "explicit-selected");
+        explicit.attr("class", "pp-explicit-option");
+        explicit.attr("style", "border-left: 1px solid #b3b3b3");
+        select.val(2);
+    } else if (id.includes("explicit")) {
+        clean.attr("class", "pp-explicit-option");
+        clean.attr("style", "border-right: 1px solid #b3b3b3;");
+        explicit.attr("class", "explicit-selected");
+        select.val(1);
+    }
+}
+
+function powerpress_toggleMetamarksSettings(el) {
+    var feed_slug;
+    let row_num_array = el.id.split("-");
+    let row_num = row_num_array[3];
+    let feed_slug_array = row_num_array.splice(4, 1);
+    if (feed_slug_array.length > 1) {
+        feed_slug = feed_slug_array.join("-");
+    } else {
+        feed_slug = feed_slug_array[0];
+    }
+    let button_id = "#" + el.id;
+    let button = jQuery(button_id);
+    let div_id = "#pp-hide-metamark-" + feed_slug + "-" + row_num;
+    let type_select_id = "#pp-metamark-type-" + feed_slug + "-" + row_num;
+    let type_preview_id = "#pp-metamark-preview-type--" + feed_slug + "-" + row_num;
+    let pos_input_id = "#pp-metamark-pos-" + feed_slug + "-" + row_num;
+    let pos_preview_id = "#pp-metamark-preview-pos-" + feed_slug + "-" + row_num;
+    jQuery(div_id).toggleClass('pp-hidden-settings');
+    if (button.text().includes('Edit')) {
+        button.html("Save");
+    } else {
+        button.html("Edit");
+        let type = jQuery(type_select_id).find(":selected").text();
+        let pos = sanitizeHTML(jQuery(pos_input_id).val());
+        jQuery(type_preview_id).html(type);
+        jQuery(pos_preview_id).html(pos);
+    }
+}
+
+function powerpress_showHideMediaDetails(el) {
+    let feed_slug = el.id.replace("show-details-link-", "");
+    let show_det = jQuery("#show-details-link-" + feed_slug);
+    let div = jQuery("#hidden-media-details-" + feed_slug);
+
+    let isCurrentlyHidden = div.hasClass('pp-hidden-settings');
+
+    div.toggleClass('pp-hidden-settings');
+
+    if (isCurrentlyHidden) {
+        show_det.html('Hide File Size and Duration  &#708;');
+        show_det.attr('title', 'Hide file size and duration');
+    } else {
+        show_det.html('View File Size and Duration  &#709;');
+        show_det.attr('title', 'Show file size and duration');
+    }
+}
+
+function powerpress_showHideAppleAdvanced(el) {
+    let feed_slug;
+    let show_det;
+    let new_id;
+    if (el.id.includes("show")) {
+        feed_slug = el.id.replace("show-apple-link-", "");
+        show_det = jQuery("#show-apple-link-" + feed_slug);
+        show_det.attr("aria-pressed", "true");
+        new_id = "hide-apple-link-" + feed_slug;
+        show_det.html(hide_settings);
+    } else {
+        feed_slug = el.id.replace("hide-apple-link-", "");
+        show_det = jQuery("#hide-apple-link-" + feed_slug);
+        show_det.attr("aria-pressed", "false");
+        new_id = "show-apple-link-" + feed_slug;
+        show_det.html(show_settings);
+    }
+    el.id = new_id;
+    let div = jQuery("#apple-advanced-settings-" + feed_slug);
+    div.toggleClass('pp-hidden-settings');
+}
+
+//keeps art previews up to date
+function powerpress_insertArtIntoPreview(el) {
+    let feed_slug = el.id.replace("powerpress_itunes_image_", "");
+    feed_slug = feed_slug.replace("powerpress_image_", "");
+    let art_input = "#powerpress_itunes_image_" + feed_slug;
+    let poster_input = "#powerpress_image_" + feed_slug;
+    let episode_artwork = jQuery(art_input);
+    let img_tag = jQuery("#pp-image-preview-" + feed_slug);
+    let caption_tag = jQuery("#pp-image-preview-caption-" + feed_slug);
+    let poster_image = jQuery(poster_input);
+    let poster_img_tag = jQuery("#poster-pp-image-preview-" + feed_slug);
+    let poster_caption_tag = jQuery("#poster-pp-image-preview-caption-" + feed_slug);
+    let new_poster_image = sanitizeHTML(poster_image.val());
+    if (poster_img_tag.attr("src") != new_poster_image && new_poster_image.length > 0) {
+        poster_img_tag.attr("src", new_poster_image);
+        let filename = "";
+        if (new_poster_image.includes("/")) {
+            let parts = new_poster_image.split("/");
+            filename = parts.pop();
+        } else {
+            let parts = new_poster_image.split("\\");
+            filename = parts.pop();
+        }
+        poster_caption_tag[0].innerHTML = filename;
+    }
+    let new_ep_image = sanitizeHTML(episode_artwork.val());
+    if (img_tag.attr("src") != new_ep_image && new_ep_image.length > 0) {
+        img_tag.attr("src", new_ep_image);
+        let filename = "";
+        if (new_ep_image.includes("/")) {
+            let parts = new_ep_image.split("/");
+            filename = parts.pop();
+        } else {
+            let parts = new_ep_image.split("\\");
+            filename = parts.pop();
+        }
+        caption_tag[0].innerHTML = filename;
+    }
+}
+
+//Display geo and osm settings if text is entered into the location setting
+function powerpress_locationInput(event){
+    let el = event.currentTarget;
+    let location_details = jQuery("#pp-location-details");
+    if (el.value.length == 0) {
+        location_details.removeAttr("style");
+        location_details.attr("style", "display: none");
+    } else if (el.value.length > 0) {
+        location_details.removeAttr("style");
+        location_details.attr("style", "display: block");
+    }
+}
+
+//Display inputs if users check a box to enable an episode-level podcast index setting
+function powerpress_epboxPCIToggle(el){
+    let id_array = el.id.split("_");
+    id_array[4] = id_array[3];
+    id_array[3] = "container";
+    let target_id = id_array.join("_");
+    let target_element = jQuery("#" + target_id);
+    if (el.checked) {
+        target_element.removeAttr("style");
+        target_element.attr("style", "display: block");
+        jQuery('#' + id_array[4] + '-chapter-builder-container').css("display", "block");
+    } else {
+        target_element.removeAttr("style");
+        target_element.attr("style", "display: none");
+        jQuery('#' + id_array[4] + '-chapter-builder-container').css("display", "none");
+    }
+}
+
+function browseChapterImages(event) {
+    event.preventDefault();
+    tb_show('Select Chapter Image', 'media-upload.php?type=image&amp;TB_iframe=true&amp;post_id=0', false);
+    g_powerpress_chapters_img_input_id = event.currentTarget.id.replace('image_browser', 'image');
+    if( pp_upload_image_button_funct == false )
+        pp_upload_image_button_funct = window.send_to_editor;
+
+    window.send_to_editor = function(html)
+    {
+        url = jQuery('img', html).attr('src');
+        if (url === undefined) {
+            url = jQuery(html).attr('src');
+        }
+        console.log(g_powerpress_chapters_img_input_id);
+        console.log(url);
+        jQuery('#' + g_powerpress_chapters_img_input_id).val( url ).change();
+        tb_remove();
+        window.send_to_editor = pp_upload_image_button_funct;
+        pp_upload_image_button_funct = false;
+    }
+    return false;
+}
+
+function escapeHTML(str) {
+    return str.replace(/[<>"']/g, function (char) {
+        switch (char) {
+            case '<':
+                return '&lt;';
+            case '>':
+                return '&gt;';
+            case '"':
+                return '&quot;';
+            default:
+                return char;
+        }
+    });
+}
+
+function powerpress_chapters_art_preview(el) {
+    let img_id = el.id.replace('powerpress_chapters_image_', 'pp-image-chapters-preview-');
+    let img_container_id = el.id.replace('powerpress_chapters_image_', 'preview-im-container-');
+    let upload_link_container_id = el.id.replace('powerpress_chapters_image_', 'pp-chapters-art-text-');
+    let artwork_url = escapeHTML(el.value);
+    jQuery('#' + upload_link_container_id).attr('style', 'display: none;')
+    jQuery('#' + img_id).attr('src', artwork_url);
+    jQuery('#' + img_container_id).attr('style', 'display: block');
+}
+
+function removeIm(event) {
+    console.log(event);
+    let id_suffix = event.id.replace('remove-im-', '');
+    let imContainer = jQuery(event).parent();
+    console.log('#pp-chapters-art-text-' + id_suffix);
+    let im = jQuery('#pp-image-chapters-preview-' + id_suffix);
+    let fileContainer = jQuery('#pp-chapters-art-text-' + id_suffix);
+    let fileInp = jQuery('#powerpress_chapters_image_' + id_suffix);
+    let removeIm = jQuery('#remove-existing-' + id_suffix);
+
+    fileInp.val('');
+    console.log(removeIm);
+    removeIm.val('1');
+
+    fileContainer.attr('style', 'display: block;');
+    console.log(fileContainer);
+    imContainer.attr('style', 'display: none !important;');
+    im.attr('src', '');
+}
+
+function powerpress_epboxPCIToggleManual(el){
+    let id_array = el.id.split("_");
+    if (el.checked) {
+        jQuery('#' + id_array[3] + '-chapter-builder').css("display", "block");
+    } else {
+        jQuery('#' + id_array[3] + '-chapter-builder').css("display", "none");
+    }
+}
+
+function setChaptersCheckboxes(id, feed_slug){
+    let noChapters = jQuery('#powerpress_chapters_none_' + feed_slug);
+    let manualChapters = jQuery('#powerpress_chapters_manual_' + feed_slug);
+    let uploadChapters = jQuery('#powerpress_pci_chapters_' + feed_slug);
+    let uploadChaptersInput = jQuery('#powerpress_pci_chapters_container_' + feed_slug);
+    let chapterBuilderContainer = jQuery('#' + feed_slug + '-chapter-builder-container');
+
+    switch(id){
+        case 'powerpress_chapters_none_' + feed_slug:
+            manualChapters.attr("checked", false);
+            uploadChapters.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                manualChapters.prop("checked", false);
+                uploadChapters.prop("checked", false);
+            }
+            uploadChaptersInput.removeAttr("style");
+            uploadChaptersInput.attr("style", "display: none");
+            chapterBuilderContainer.removeAttr("style");
+            chapterBuilderContainer.attr("style", "display: none");
+            break;
+
+        case 'powerpress_chapters_manual_' + feed_slug:
+            noChapters.attr("checked", false);
+            uploadChapters.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                noChapters.prop("checked", false);
+                uploadChapters.prop("checked", false);
+            }
+            uploadChaptersInput.removeAttr("style");
+            uploadChaptersInput.attr("style", "display: none");
+            chapterBuilderContainer.removeAttr("style");
+            chapterBuilderContainer.attr("style", "display: block");
+            break;
+
+        case 'powerpress_pci_chapters_' + feed_slug:
+
+            noChapters.attr("checked", false);
+            manualChapters.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                noChapters.prop("checked", false);
+                manualChapters.prop("checked", false);
+            }
+            uploadChaptersInput.removeAttr("style");
+            uploadChaptersInput.attr("style", "display: block");
+            chapterBuilderContainer.removeAttr("style");
+            chapterBuilderContainer.attr("style", "display: none");
+            break;
+    }
+}
+
+function setTranscriptCheckboxes(id, feed_slug){
+    let noTranscript = jQuery('#powerpress_transcript_none_' + feed_slug);
+    let generateTranscript = jQuery('#powerpress_transcript_generate_' + feed_slug);
+    let uploadTranscript = jQuery('#powerpress_pci_transcript_' + feed_slug);
+    let uploadTranscriptInput = jQuery('#powerpress_pci_transcript_container_' + feed_slug);
+    let generateTranscriptLanguage = jQuery('#pp-generate-language-' + feed_slug);
+    let uploadTranscriptLanguage = jQuery('#pp-upload-language-' + feed_slug);
+    let generateTranscriptLanguageContainer = jQuery('#powerpress_generate_transcript_container_' + feed_slug);
+
+    switch(id){
+        case 'powerpress_transcript_none_' + feed_slug:
+            generateTranscript.attr("checked", false);
+            uploadTranscript.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                generateTranscript.prop("checked", false);
+                uploadTranscript.prop("checked", false);
+            }
+            uploadTranscriptInput.removeAttr("style");
+            uploadTranscriptInput.attr("style", "display: none");
+            generateTranscriptLanguageContainer.removeAttr("style");
+            generateTranscriptLanguageContainer.attr("style", "display: none");
+            uploadTranscriptLanguage.attr('disabled', true);
+            generateTranscriptLanguage.attr('disabled', true);
+            break;
+
+        case 'powerpress_transcript_generate_' + feed_slug:
+            noTranscript.attr("checked", false);
+            uploadTranscript.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                noTranscript.prop("checked", false);
+                uploadTranscript.prop("checked", false);
+            }
+            uploadTranscriptInput.removeAttr("style");
+            uploadTranscriptInput.attr("style", "display: none");
+            generateTranscriptLanguageContainer.removeAttr("style");
+            generateTranscriptLanguageContainer.attr("style", "display: block");
+            uploadTranscriptLanguage.attr('disabled', true);
+            generateTranscriptLanguage.removeAttr('disabled');
+            break;
+
+        case 'powerpress_pci_transcript_' + feed_slug:
+
+            noTranscript.attr("checked", false);
+            generateTranscript.attr("checked", false);
+            if(typeof jQuery.prop === 'function') {
+                noTranscript.prop("checked", false);
+                generateTranscript.prop("checked", false);
+            }
+            uploadTranscriptInput.removeAttr("style");
+            uploadTranscriptInput.attr("style", "display: block");
+            generateTranscriptLanguageContainer.removeAttr("style");
+            generateTranscriptLanguageContainer.attr("style", "display: none");
+            uploadTranscriptLanguage.removeAttr('disabled');
+            generateTranscriptLanguage.attr('disabled', true);
+            break;
+    }
+}
+
+function showHideTranscriptBox(setting_type, feed_slug){
+    let optionsBox = jQuery('#' + setting_type + '-box-options-' + feed_slug);
+    if(optionsBox.is(':hidden')){
+        optionsBox.prop('style', 'margin-top: 1.5em;display: block;');
+        if(typeof jQuery.prop === 'function') {
+            optionsBox.prop('style', 'margin-top: 1.5em;display: block;');
+        }
+    } else {
+        optionsBox.attr('style', 'display: none;');
+        if(typeof jQuery.prop === 'function') {
+            optionsBox.prop('style', 'display: none;');
+        }
+    }
+}
+
+
+// DEPRECATED FEATURE MODAL HANDLER
+(function() {
+    var currentFeature = null;
+
+    function initDeprecatedFeatureModal() {
+        var modal = document.getElementById('pp-deprecated-feature-modal');
+        var confirmBtn = document.getElementById('pp-deprecated-confirm-btn');
+        var checkboxes = document.querySelectorAll('.pp-deprecated-feature-checkbox');
+
+        if (!modal || !confirmBtn || !checkboxes.length) return;
+
+        // intercept uncheck on deprecated feature checkboxes
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function(e) {
+                if (!this.checked) {
+                    e.preventDefault();
+                    this.checked = true;
+                    currentFeature = this.dataset.feature;
+                    var keepRadio = document.querySelector('input[name="pp_deprecated_confirm"][value="keep"]');
+                    if (keepRadio) keepRadio.checked = true;
+                    modal.style.display = 'block';
+                }
+            });
+        });
+
+        // confirm button
+        confirmBtn.addEventListener('click', function() {
+            var checkedRadio = document.querySelector('input[name="pp_deprecated_confirm"]:checked');
+            var choice = checkedRadio ? checkedRadio.value : 'keep';
+            var featureToDisable = currentFeature; // capture before async
+            modal.style.display = 'none';
+            currentFeature = null;
+
+            if (choice === 'disable' && featureToDisable) {
+                var nonceEl = document.getElementById('pp-deprecated-nonce');
+                var nonce = nonceEl ? nonceEl.value : '';
+
+                var formData = new FormData();
+                formData.append('action', 'powerpress_disable_deprecated_feature');
+                formData.append('feature', featureToDisable);
+                formData.append('_wpnonce', nonce);
+
+                fetch(ajaxurl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        var sectionId = 'pp-' + featureToDisable.replace(/_/g, '-') + '-section';
+                        var section = document.getElementById(sectionId);
+                        if (section) section.style.display = 'none';
+                    } else {
+                        alert('Failed to disable feature. Please refresh the page and try again.');
+                    }
+                })
+                .catch(function() {
+                    alert('Network error. Please check your connection and try again.');
+                });
+            }
+        });
+
+        // close modal on background click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                currentFeature = null;
+            }
+        });
+    }
+
+    // init on dom ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDeprecatedFeatureModal);
+    } else {
+        initDeprecatedFeatureModal();
+    }
+})();
+
+
+/**
+ * <podcast:updateFrequency>
+ * 
+ * most users will simply use the cadence selector, advanced input revealed by using custom option instaed
+ */
+(function() {
+    const PRESETS = {
+        daily: { freq: 'DAILY', interval: 1 },
+        weekly: { freq: 'WEEKLY', interval: 1 },
+        semiweekly: { freq: 'WEEKLY', interval: 1, byday: ['MO', 'TH'] },
+        biweekly: { freq: 'WEEKLY', interval: 2 },
+        monthly: { freq: 'MONTHLY', interval: 1 },
+        semimonthly: { freq: 'MONTHLY', interval: 1, bymonthday: [1, 15] },
+        bimonthly: { freq: 'MONTHLY', interval: 2 },
+    };
+
+    function setChipChecked(el, checked) {
+        if (!el) return;
+        el.checked = checked;
+        const label = el.closest('label');
+        if (!label) return;
+        label.style.background = checked ? '#1976d2' : '#fff';
+        label.style.color = checked ? '#fff' : '#333';
+    }
+
+    function applyCadencePreset(cadence) {
+        const customPanel = document.querySelector('[data-uf-custom-panel]');
+        const itunesComplete = document.querySelector('[data-uf-itunes-complete]');
+        const freqSelect = document.querySelector('[data-uf-freq]');
+        const intervalInput = document.getElementById(freqSelect ? freqSelect.id.replace(/_freq$/, '_interval') : '');
+
+        if (customPanel) customPanel.style.display = (cadence === 'custom') ? 'block' : 'none';
+
+        if (cadence === 'complete') {
+            if (itunesComplete) itunesComplete.value = '1';
+            return;
+        }
+        if (itunesComplete) itunesComplete.value = '';
+
+        if (cadence === '' || cadence === 'custom') return;
+
+        const preset = PRESETS[cadence];
+        if (!preset) return;
+
+        if (freqSelect && preset.freq) freqSelect.value = preset.freq;
+        if (intervalInput) intervalInput.value = preset.interval || 1;
+
+        document.querySelectorAll('[data-uf-day-chip]').forEach(function(chip) {
+            setChipChecked(chip, !!(preset.byday && preset.byday.indexOf(chip.value) !== -1));
+        });
+        document.querySelectorAll('[data-uf-day-cell]').forEach(function(cell) {
+            setChipChecked(cell, !!(preset.bymonthday && preset.bymonthday.indexOf(parseInt(cell.value, 10)) !== -1));
+        });
+        document.querySelectorAll('[data-uf-month-cell]').forEach(function(cell) {
+            setChipChecked(cell, false);
+        });
+
+        applyFreqVisibility();
+    }
+
+    function applyFreqVisibility() {
+        const freqSelect = document.querySelector('[data-uf-freq]');
+        const freq = freqSelect ? freqSelect.value : '';
+        document.querySelectorAll('[data-uf-show-for]').forEach(function(el) {
+            const allowed = el.getAttribute('data-uf-show-for').split(/\s+/);
+            el.style.display = allowed.indexOf(freq) !== -1 ? '' : 'none';
+        });
+        applyMonthlyPatternVisibility();
+    }
+
+    function applyMonthlyPatternVisibility() {
+        const freqSelect = document.querySelector('[data-uf-freq]');
+        const freq = freqSelect ? freqSelect.value : '';
+        const checked = document.querySelector('[data-uf-monthly-pattern]:checked');
+        const pattern = checked ? checked.value : '';
+        document.querySelectorAll('[data-uf-show-monthly-pattern]').forEach(function(el) {
+            const allowed = el.getAttribute('data-uf-show-monthly-pattern');
+            const freqMatches = (freq === 'MONTHLY' || freq === 'YEARLY');
+            el.style.display = (freqMatches && allowed === pattern) ? '' : 'none';
+        });
+    }
+
+    function applyEndsState() {
+        const checked = document.querySelector('[data-uf-ends]:checked');
+        const mode = checked ? checked.value : 'never';
+        const countInput = document.querySelector('[data-uf-ends-count]');
+        const untilInput = document.querySelector('[data-uf-ends-until]');
+        if (countInput) countInput.disabled = (mode !== 'count');
+        if (untilInput) untilInput.disabled = (mode !== 'until');
+    }
+
+    function bindChipToggle(selector) {
+        document.querySelectorAll(selector).forEach(function(input) {
+            const label = input.closest('label');
+            if (!label) return;
+            input.addEventListener('change', function() {
+                setChipChecked(input, input.checked);
+            });
+        });
+    }
+
+    function initUpdateFrequencyForm() {
+        const cadenceSelect = document.querySelector('[data-uf-cadence]');
+        if (!cadenceSelect) return;
+
+        cadenceSelect.addEventListener('change', function() {
+            applyCadencePreset(this.value);
+        });
+
+        const freqSelect = document.querySelector('[data-uf-freq]');
+        if (freqSelect) freqSelect.addEventListener('change', applyFreqVisibility);
+
+        document.querySelectorAll('[data-uf-monthly-pattern]').forEach(function(radio) {
+            radio.addEventListener('change', applyMonthlyPatternVisibility);
+        });
+
+        document.querySelectorAll('[data-uf-ends]').forEach(function(radio) {
+            radio.addEventListener('change', applyEndsState);
+        });
+
+        bindChipToggle('[data-uf-day-chip]');
+        bindChipToggle('[data-uf-day-cell]');
+        bindChipToggle('[data-uf-month-cell]');
+
+        applyFreqVisibility();
+        applyEndsState();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUpdateFrequencyForm);
+    } else {
+        initUpdateFrequencyForm();
+    }
+})();
+
+

@@ -1,0 +1,116 @@
+== Changelog ==
+
+= 6.4.1 =
+
+* Updated links to documentation.
+
+= 6.4.0 =
+
+* Added `post-author` and `post-author-only` cases for `role` option (props to @agenziae20 for the suggestion).
+* Underscore (`_`) is changed into a dash (`-`) when building the CSS class.
+
+= 6.3.1 =
+
+* Added new link to plugin line in the WordPress plugins management page.
+* Updated compatibility to WordPress 5.6.
+
+= 6.3 =
+
+* Added support for user IDs in recipient option.
+
+= 6.2 =
+
+* Added support for custom HTML classes and HTML IDs.
+* Added reverse option for custom roles.
+* Convert user-entered custom roles into lowercase.
+* Added case `visitor` which is equivalent to `visitor-only`.
+* Administrators can read hidden texts for Visitors.
+
+= 6.1 =
+
+* Added use of multiple custom roles.
+* Added a new filter when there is no text to be displayed.
+* Added a new filter for hidden text.
+* Added a new filter for alternate text.
+* Now Administrators can always read text for custom roles, unless a `role="custom-only"` option has been used.
+* Code optimization.
+
+= 6.0 =
+
+* Added use of custom roles.
+
+= 5.1 =
+
+* Changed the coding paradigm to OOP.
+
+= 5.0 =
+
+* Added `reverse` option to change the logic of the `recipient` option.
+
+= 4.4 =
+
+* Checked code against PHPCS.
+
+= 4.3 =
+
+* Added `ubn_private` as an extra shortcode, in case `private` is already in use.
+* Improved security.
+
+= 4.2 =
+
+* Improved security.
+* Changed text domain declaration.
+* Added translation files.
+
+= 4.1 =
+
+* NEW: added support for links in alternate text.
+
+= 4.0 =
+
+* NEW: Added support for multiple recipents.
+
+= 3.0 =
+
+* NEW: Added option for a single user.
+* FIX: now, if the role is not correctly entered, the shortcode does not display anything.
+* Removed CSS class in the alternate text, in order to hide which type of users was the recipent of the text.
+
+= 2.5 =
+
+* NEW: Added ability to use "span" as a container.
+* FIX: Removed shortcode execution in feed.
+
+= 2.4 =
+
+* NEW: now it's possible to use a `div` container instead of `p`, thanks to a pull request of Matt.
+
+= 2.3 =
+
+* FIX: Added styling option for the alternate text.
+* Added style to role-only alternate text.
+
+= 2.2 =
+
+* NEW: now the plugin can show an alternate text if the reader hasn't the capability to read the text.
+
+= 2.1 =
+
+* NEW: added the possibility to show a note only to Visitors (thanks to Jacki for the tip).
+
+= 2.0 =
+
+* NEW: now you can show a note only to user of a specific role, hiding that note to higher roles.
+* Added uninstall.php to delete the new custom capabilities.
+
+= 1.2 =
+
+* Now the inline style appears only if necessary.
+
+= 1.1 =
+
+* Upon request, added the possibility to align the text left, right, centered and justified.
+
+= 1.0 =
+
+* First release of the plugin.
