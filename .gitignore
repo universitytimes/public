@@ -19,6 +19,16 @@ wp-content/**/*.sql
 wp-content/plugins/file-manager-advanced/application/library/files/*
 !wp-content/plugins/file-manager-advanced/application/library/files/.gitkeep
 
+# --- Raw DB dumps sitting in the web root — never belong in git (also a live data-exposure risk) ---
+mwp_db/
+.st89ing/
+
+# --- Large archived back-issue media — real content, kept on disk, not versioned in git ---
+ssnd/*.pdf
+markofexcellence/*.pdf
+markofexcellence/*.mp3
+wp-content/themes/universitytimes/markofexcellence2016/*.pdf
+
 # --- Forensic/quarantine material — should never enter version control history ---
 .sucuriquarantine/
 
