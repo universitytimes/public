@@ -32,6 +32,9 @@ wp-content/themes/universitytimes/markofexcellence2016/*.pdf
 # --- Forensic/quarantine material — should never enter version control history ---
 .sucuriquarantine/
 
+# --- Debug/diagnostic scripts — never belong in a live web root ---
+local-phpinfo.php
+
 # --- OS and editor junk ---
 .DS_Store
 Thumbs.db

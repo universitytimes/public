@@ -1,0 +1,37 @@
+name: Deploy WordPress to GoDaddy via rsync
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deployment_dest:
+        description: 'Target server directory, leave blank for root directory'
+        required: false
+        default: ''
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v6
+      - name: Synchronize Files with GoDaddy WordPress Hosting Server
+        uses: godaddy-wordpress/gd-wordpress-deployer@v1
+        with:
+          remote_host: "98a.05d.myftpupload.com"
+          ssh_user: "git_deployer_f8ba27f4f9_778193"
+          ssh_private_key: ${{secrets.PRIVATE_KEY}}
+          deployment_dest: ${{ github.event.inputs.deployment_dest }}
+          enable_health_check: "yes"
+
+  mirror-to-gitlab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Push to GitLab mirror
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/university-times/ut-website.git
+          git push gitlab HEAD:main
+        continue-on-error: true
