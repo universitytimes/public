@@ -170,27 +170,18 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 		$columns = array(
 			'date'        => __( 'Date', 'aryo-activity-log' ),
 			'author'      => __( 'User', 'aryo-activity-log' ),
-			'ip'          => __( 'IP', 'aryo-activity-log' ),
+			'source'      => __( 'Source', 'aryo-activity-log' ),
 			'type'        => __( 'Topic', 'aryo-activity-log' ),
 			'label'       => __( 'Context', 'aryo-activity-log' ),
 			'description' => __( 'Meta', 'aryo-activity-log' ),
 			'action'      => __( 'Action', 'aryo-activity-log' ),
 		);
 
-        if ( ! $this->is_store_ip_address() ) {
-            unset( $columns['ip'] );
-        }
-
 		return $columns;
 	}
 
-    private function is_store_ip_address() {
-        return 'no-collect-ip' !== AAL_Main::instance()->settings->get_option( 'log_visitor_ip_source' );
-    }
-
 	public function get_sortable_columns() {
 		return array(
-			'ip' => array( 'hist_ip', 'desc' ),
 			'date' => array( 'hist_time', true ),
 		);
 	}
@@ -231,9 +222,9 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 		printf(
 			'<tr class="aal-table-promotion-row" data-promotion-id="%s" data-nonce="%s"><td colspan="' . count( $this->get_columns() ) . '"><div class="aal-table-promotion-inner">%s%s</div></td></tr>',
 			esc_attr( $object_type ),
-			wp_create_nonce( 'aal_promotion' ),
-			$promotion_html,
-			$dismiss_button
+			esc_attr( wp_create_nonce( 'aal_promotion' ) ),
+			$promotion_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in get_promotion_html_by_object_type().
+			$dismiss_button // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- label escaped with esc_html__().
 		);
 	}
 
@@ -339,10 +330,6 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 				$return .= '<br />' . date_i18n( get_option( 'time_format' ), $item->hist_time );
 				break;
 
-			case 'ip':
-				$return = '<a href="' . $this->get_filtered_link( 'filter_ip', $item->hist_ip ) . '">' . esc_html( $item->hist_ip ) . '</a>';
-				break;
-
 			default:
 				if ( isset( $item->$column_name ) ) {
 					$return = $item->$column_name;
@@ -373,6 +360,49 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 			'<span class="aal-author-name">%s</span>',
 			__( 'N/A', 'aryo-activity-log' )
 		);
+	}
+
+	public function column_source( $item ) {
+		$parts = array();
+
+		$raw = isset( $item->request_source ) ? $item->request_source : '';
+		if ( '' !== $raw ) {
+			$parsed = AAL_API::parse_request_source( $raw );
+			$channel_labels = AAL_API::get_channel_labels();
+
+			if ( ! empty( $parsed['channel'] ) && isset( $channel_labels[ $parsed['channel'] ] ) ) {
+				$parts[] = sprintf(
+					'<a href="%s" class="aal-source-badge aal-source-badge--channel">%s</a>',
+					esc_url( $this->get_filtered_link( 'sourceshow', $parsed['channel'] ) ),
+					esc_html( $channel_labels[ $parsed['channel'] ] )
+				);
+			}
+
+			if ( ! empty( $parsed['app_name'] ) ) {
+				$parts[] = sprintf(
+					'<a href="%s" class="aal-source-badge aal-source-badge--app" title="%s">%s</a>',
+					esc_url( $this->get_filtered_link( 'sourceshow', 'app_password' ) ),
+					esc_attr__( 'Application Password', 'aryo-activity-log' ),
+					esc_html( $parsed['app_name'] )
+				);
+			} elseif ( '' === $parsed['app_name'] && false !== strpos( $raw, 'app:' ) ) {
+				$parts[] = sprintf(
+					'<a href="%s" class="aal-source-badge aal-source-badge--app">%s</a>',
+					esc_url( $this->get_filtered_link( 'sourceshow', 'app_password' ) ),
+					esc_html__( 'App Password', 'aryo-activity-log' )
+				);
+			}
+		}
+
+		if ( ! empty( $item->hist_ip ) && 'no-collect-ip' !== AAL_Main::instance()->settings->get_option( 'log_visitor_ip_source' ) ) {
+			$parts[] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $this->get_filtered_link( 'filter_ip', $item->hist_ip ) ),
+				esc_html( $item->hist_ip )
+			);
+		}
+
+		return implode( '<br>', $parts );
 	}
 
 	public function column_type( $item ) {
@@ -528,9 +558,21 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 				<?php
 				// Is result filtering enabled?
 				if ( array_key_exists( 'aal-filter', $_GET ) ) {
-					echo sprintf( esc_html__( 'Export filtered records as %s', 'aryo-activity-log' ), $action_title );
+					echo esc_html(
+						sprintf(
+							/* translators: %s: export format title. */
+							__( 'Export filtered records as %s', 'aryo-activity-log' ),
+							$action_title
+						)
+					);
 				} else {
-					echo sprintf( esc_html__( 'Export as %s', 'aryo-activity-log' ), $action_title );
+					echo esc_html(
+						sprintf(
+							/* translators: %s: export format title. */
+							__( 'Export as %s', 'aryo-activity-log' ),
+							$action_title
+						)
+					);
 				}
 				?>
 			</button>
@@ -584,7 +626,7 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 			);
 			echo '<select name="dateshow" id="hs-filter-date">';
 			foreach ( $date_options as $key => $value )
-				printf( '<option value="%s"%s>%s</option>', $key, selected( $_REQUEST['dateshow'], $key, false ), $value );
+				printf( '<option value="%s"%s>%s</option>', esc_attr( $key ), selected( $_REQUEST['dateshow'], $key, false ), esc_html( $value ) );
 			echo '</select>';
 
 			submit_button( __( 'Filter', 'aryo-activity-log' ), 'button', 'aal-filter', false, array( 'id' => 'activity-query-submit' ) );
@@ -601,9 +643,9 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 
 			if ( ! empty( $output ) ) {
 				echo '<select name="capshow" id="hs-filter-capshow">';
-				printf( '<option value="">%s</option>', __( 'All Roles', 'aryo-activity-log' ) );
+				printf( '<option value="">%s</option>', esc_html__( 'All Roles', 'aryo-activity-log' ) );
 				foreach ( $output as $key => $value ) {
-					printf( '<option value="%s"%s>%s</option>', $key, selected( $_REQUEST['capshow'], $key, false ), $value );
+					printf( '<option value="%s"%s>%s</option>', esc_attr( $key ), selected( $_REQUEST['capshow'], $key, false ), esc_html( $value ) );
 				}
 				echo '</select>';
 			}
@@ -625,9 +667,9 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 
 			if ( ! empty( $output ) ) {
 				echo '<select name="usershow" id="hs-filter-usershow">';
-				printf( '<option value="">%s</option>', __( 'All Users', 'aryo-activity-log' ) );
+				printf( '<option value="">%s</option>', esc_html__( 'All Users', 'aryo-activity-log' ) );
 				foreach ( $output as $key => $value ) {
-					printf( '<option value="%s"%s>%s</option>', $key, selected( $_REQUEST['usershow'], $key, false ), $value );
+					printf( '<option value="%s"%s>%s</option>', esc_attr( $key ), selected( $_REQUEST['usershow'], $key, false ), esc_html( $value ) );
 				}
 				echo '</select>';
 			}
@@ -638,19 +680,16 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 				$_REQUEST['typeshow'] = '';
 			}
 
-			$output = array();
+			echo '<select name="typeshow" id="hs-filter-typeshow">';
+			printf( '<option value="">%s</option>', esc_html__( 'All Topics', 'aryo-activity-log' ) );
 			foreach ( $this->data_types as $object_type ) {
-				$output[] = sprintf(
+				printf(
 					'<option value="%s"%s>%s</option>',
-					$object_type,
+					esc_attr( $object_type ),
 					selected( $_REQUEST['typeshow'], $object_type, false ),
-					__( $object_type, 'aryo-activity-log' )
+					esc_html( $object_type )
 				);
 			}
-
-			echo '<select name="typeshow" id="hs-filter-typeshow">';
-			printf( '<option value="">%s</option>', __( 'All Topics', 'aryo-activity-log' ) );
-			echo implode( '', $output );
 			echo '</select>';
 		}
 
@@ -667,13 +706,38 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 			if ( ! isset( $_REQUEST['showaction'] ) )
 				$_REQUEST['showaction'] = '';
 
-			$output = array();
-			foreach ( $actions as $action )
-				$output[] = sprintf( '<option value="%s"%s>%s</option>', $action->action, selected( $_REQUEST['showaction'], $action->action, false ), $this->get_action_label( $action->action ) );
-
 			echo '<select name="showaction" id="hs-filter-showaction">';
-			printf( '<option value="">%s</option>', __( 'All Actions', 'aryo-activity-log' ) );
-			echo implode( '', $output );
+			printf( '<option value="">%s</option>', esc_html__( 'All Actions', 'aryo-activity-log' ) );
+			foreach ( $actions as $action ) {
+				printf(
+					'<option value="%s"%s>%s</option>',
+					esc_attr( $action->action ),
+					selected( $_REQUEST['showaction'], $action->action, false ),
+					esc_html( $this->get_action_label( $action->action ) )
+				);
+			}
+			echo '</select>';
+		}
+
+		if ( AAL_Maintenance::is_schema_ready( '1.1' ) ) {
+			if ( ! isset( $_REQUEST['sourceshow'] ) ) {
+				$_REQUEST['sourceshow'] = '';
+			}
+
+			$source_options = array(
+				''             => __( 'All Sources', 'aryo-activity-log' ),
+				'abilities'    => __( 'WP Abilities', 'aryo-activity-log' ),
+				'rest'         => __( 'REST API', 'aryo-activity-log' ),
+				'xmlrpc'       => __( 'XML-RPC', 'aryo-activity-log' ),
+				'cli'          => __( 'WP-CLI', 'aryo-activity-log' ),
+				'cron'         => __( 'WP-Cron', 'aryo-activity-log' ),
+				'app_password' => __( 'App Password', 'aryo-activity-log' ),
+			);
+
+			echo '<select name="sourceshow" id="hs-filter-sourceshow">';
+			foreach ( $source_options as $key => $label ) {
+				printf( '<option value="%s"%s>%s</option>', esc_attr( $key ), selected( $_REQUEST['sourceshow'], $key, false ), esc_html( $label ) );
+			}
 			echo '</select>';
 		}
 
@@ -683,11 +747,12 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 			'usershow',
 			'typeshow',
 			'showaction',
+			'sourceshow',
 		);
 
 		foreach ( $filters as $filter ) {
 			if ( ! empty( $_REQUEST[ $filter ] ) ) {
-				echo '<a href="' . $this->get_filtered_link() . '" id="aal-reset-filter"><span class="dashicons dashicons-dismiss"></span>' . __( 'Reset Filters', 'aryo-activity-log' ) . '</a>';
+				echo '<a href="' . esc_url( $this->get_filtered_link() ) . '" id="aal-reset-filter"><span class="dashicons dashicons-dismiss"></span>' . esc_html__( 'Reset Filters', 'aryo-activity-log' ) . '</a>';
 				break;
 			}
 		}
@@ -729,6 +794,19 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 			$where .= $wpdb->prepare( ' AND `user_caps` = %s', strtolower( sanitize_text_field( $_REQUEST['capshow'] ) ) );
 		}
 
+		if ( AAL_Maintenance::is_schema_ready( '1.1' ) && ! empty( $_REQUEST['sourceshow'] ) ) {
+			$source_filter = sanitize_key( $_REQUEST['sourceshow'] );
+			if ( 'app_password' === $source_filter ) {
+				$where .= " AND (`request_source` LIKE '%|app:%' OR `request_source` LIKE 'app:%')";
+			} else {
+				$where .= $wpdb->prepare(
+					" AND (`request_source` = %s OR `request_source` LIKE %s)",
+					$source_filter,
+					$wpdb->esc_like( $source_filter ) . '|%'
+				);
+			}
+		}
+
 		if ( isset( $_REQUEST['dateshow'] ) ) {
 			$current_time = current_time( 'timestamp' );
 
@@ -761,7 +839,7 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 
 		if ( isset( $_REQUEST['s'] ) ) {
 			$search_esc_like = '%' . $wpdb->esc_like( $_REQUEST['s'] ) . '%';
-			$where .= $wpdb->prepare( ' AND (`object_name` LIKE %s OR `object_subtype` LIKE %s)', $search_esc_like, $search_esc_like );
+			$where .= $wpdb->prepare( ' AND (`object_name` LIKE %s OR `object_subtype` LIKE %s OR `hist_ip` LIKE %s)', $search_esc_like, $search_esc_like, $search_esc_like );
 		}
 
 		$offset = ( $this->get_pagenum() - 1 ) * $items_per_page;
@@ -815,8 +893,8 @@ class AAL_Activity_Log_List_Table extends WP_List_Table {
 		$input_id = $input_id . '-search-input';
 		?>
 		<p class="search-box">
-			<label class="screen-reader-text" for="<?php echo $input_id ?>"><?php echo $text; ?>:</label>
-			<input type="search" id="<?php echo $input_id ?>" name="s" value="<?php echo esc_attr( $search_data ); ?>" />
+			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
+			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php echo esc_attr( $search_data ); ?>" />
 			<?php submit_button( $text, 'button', false, false, array('id' => 'search-submit') ); ?>
 		</p>
 	<?php

@@ -262,26 +262,7 @@ function wpse_ad_content($content)
 
     return $new_content;
 }
-  
-  
-  
-  add_filter( 'liveblog_active_commands',  array( __CLASS__, 'add_highlight_command' ), 10 );
 
-
-  		function add_highlight_command( $commands ) {
-	
-  				$commands[] = highlight;
-  
-  				return $commands;
-  
-  
-			}  
-  
-
-  
-  
-  
-  
 function woo_get_most_popular_list_schedule(){
    //check if event scheduled before
   if(!wp_next_scheduled('woo_get_most_popular_list_job'))
