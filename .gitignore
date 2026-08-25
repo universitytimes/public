@@ -35,6 +35,29 @@ wp-content/themes/universitytimes/markofexcellence2016/*.pdf
 # --- Debug/diagnostic scripts — never belong in a live web root ---
 local-phpinfo.php
 
+# --- Wordfence-generated data (firewall rules, attack logs, GeoIP DB, synced config) — not plugin code ---
+wp-content/wflogs/
+wp-content/plugins/wordfence/tmp/*
+!wp-content/plugins/wordfence/tmp/.htaccess
+
+# --- Query Monitor's db.php drop-in — a symlink baking in a server-specific absolute path, not portable code ---
+wp-content/db.php
+
+# --- Server/platform-generated content swept in by the fresh-baseline re-sync — not site code ---
+# WP core's transient backup-before-update mechanism
+wp-content/upgrade-temp-backup/
+# GoDaddy platform infrastructure (mu-plugins and object-cache drop-in)
+wp-content/mu-plugins/gd-system-plugin*
+wp-content/mu-plugins/object-cache-pro*
+wp-content/object-cache.php
+# The deployer tool's own installation
+git-deployer-app/
+# Auto-generated thumbnail cache
+.tmb/
+# Root-owned, GoDaddy platform-managed
+.user.ini
+plat-cron.php
+
 # --- OS and editor junk ---
 .DS_Store
 Thumbs.db

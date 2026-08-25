@@ -3,7 +3,7 @@ Contributors: Ipstenu, mikeschroder, techpriester, danielbachhuber, dvershinin
 Tags: proxy, purge, cache, varnish, nginx
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 5.12.2
+Stable tag: 5.12.3
 Requires PHP: 7.4
 License: Apache License 2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
@@ -479,6 +479,9 @@ Security fix: the manual per-page purge action now only ever purges URLs on your
 Cron-mode (async purge queue) is no longer auto-enabled when `DISABLE_WP_CRON` is defined. If your site relied on that behaviour and you want to keep the async queue, add `define( 'VHP_ENABLE_CRON_PURGING', true );` to wp-config.php, or enable the option in the plugin settings. Most sites running system cron will be unaffected — synchronous purges are faster and avoid the stuck-queue class of bugs this release fixes.
 
 == Changelog ==
+
+= 5.12.3 (2026-08) =
+* Fix: Multipage posts now purge every numbered page. 5.12.1 covered pages 2..N by asking the proxy for a wildcard purge of the post URL, which did not invalidate them on the reporter's setup. The plugin now purges the real page URLs (/your-post/2, /your-post/3, ...) with the same ordinary PURGE requests that already work for page 1, so it no longer depends on the proxy handling wildcards. Reported by @didierjm.
 
 = 5.12.2 (2026-08) =
 * Fix: "max-age=0" is no longer a Site Health error when the response proves a shared cache is serving the page. Proxies that consume "s-maxage" and strip it from the response used to make correctly cached sites look broken; cache hit indicators now downgrade the finding to a warning. Reported by @davidkoster89.
