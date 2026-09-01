@@ -203,6 +203,7 @@ if ( $my_query->have_posts() ) : ?>
 
 
 <?php while ( $my_query->have_posts() ) : $my_query->the_post(); ?>
+<?php $layoutoffirstarticle = 'landscape'; ?>
 
 
 <?php $count++; ?>
@@ -2717,6 +2718,7 @@ if ( $my_query->have_posts() ) : ?>
 									
 									
 					<?php while ( $my_query->have_posts() ) : $my_query->the_post(); ?>
+					<?php $columncontinue = 'yes'; ?>
 									
 									
 									<?php $count++; ?>
@@ -3085,6 +3087,7 @@ if ( $my_query->have_posts() ) : ?>
 
 
 			<?php while ( $my_query->have_posts() ) : $my_query->the_post(); ?>
+			<?php $opedcontinue = 'yes'; ?>
 
 
 									<?php $count++; ?>
