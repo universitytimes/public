@@ -228,7 +228,6 @@ $finalpostlist = array_filter($listofrecentposts);
 			
 			
 			
-		<!--	<?php print_r ($ut_full_array); ?> -->
 						
 
 				

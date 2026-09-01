@@ -68,6 +68,9 @@ vendor/
 
 # Local pre-fix scratch backups — never track
 *.pre-fix-backup-*
+
+# Timestamped pre-fix backup scratch files (any bug/session naming)
+*.pre-*-backup-*
 *-BACKUP-*
 *.bak
 *.orig

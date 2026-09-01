@@ -182,7 +182,6 @@ $finalpostlist = array_filter($utlist_reordered);
 			
 			
 			
-		<!--	<?php print_r ($ut_full_array); ?> -->
 						
 
 				<div id="inner-content" class="wrap cf">
