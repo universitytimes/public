@@ -119,7 +119,6 @@ $utlist_reordered = array(	$mergelists[0],
 							$mergelists[22],
 							$mergelists[23],
 							$mergelists[24],
-							$mergelists[25],
 							);
 							
 							
@@ -163,7 +162,6 @@ else {
 							$listofrecentposts[22],
 							$listofrecentposts[23],
 							$listofrecentposts[24],
-							$listofrecentposts[25],
 							);
 
 $finalpostlist = array_filter($utlist_reordered);
