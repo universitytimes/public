@@ -129,7 +129,10 @@ class MetaSlider
                     return $defaults[$name] ? 'true' : 'false';
                 }
 
-                return $defaults[$name] ? $defaults[$name] : 'false';
+                // strlen(), not a truthy check - a legitimate zero default
+                // (e.g. corner_radius, border_width) is falsy in PHP and
+                // would otherwise collapse to the string 'false'.
+                return strlen($defaults[$name]) > 0 ? $defaults[$name] : 'false';
             }
         } else {
             if (strlen($this->settings[$name]) > 0) {
@@ -197,8 +200,12 @@ class MetaSlider
             'carouselMargin' => 5,
             'minItems' => 2,
             'maxItems' => 0,
+            'carouselItems_smartphone' => 0,
+            'carouselItems_tablet' => 0,
+            'carouselItems_laptop' => 0,
+            'carouselItems_desktop' => 0,
             // @since 3.111.2 - MetaSlider Pro - Layer slide type
-            // @TODO - Handle through Pro plugin's own 'metaslider_default_parameters' filter
+            // @TODO - Remove 'layer_scaling' as was added through Pro plugin's own 'metaslider_default_parameters' filter at 2.60
             'layer_scaling' => 'up_and_down',
             'forceHeight' => false,
             'firstSlideFadeIn' => false,
@@ -289,6 +296,7 @@ class MetaSlider
             'post_status' => array('inherit', 'publish'),
             'lang' => '', // polylang, ingore language filter
             'suppress_filters' => 1, // wpml, ignore language filter
+            // phpcs:ignore WordPressVIPMinimum.Performance.NoPaging.posts_per_page_posts_per_page
             'posts_per_page' => -1,
             'tax_query' => array(
                 array(

@@ -4,7 +4,7 @@ Tags: Activity Log, User Log, Audit Log, Security, Email Log,
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 2.12.1
+Stable tag: 2.13.1
 License: GPLv2 or later
 
 Monitor every change on your WordPress site — who did what, when, and where it came from — for a complete audit trail and stronger security.
@@ -142,6 +142,12 @@ Yes. Beyond the built-in toggles for failed logins and email logs, developers ca
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/vdp/aryo-activity-log).
 
 == Changelog ==
+
+= 2.13.1 - 2026-08-26 =
+* Fix: CSV export file missing IP column ([Topic](https://wordpress.org/support/topic/missing-source-ip-in-csv-export/))
+
+= 2.13.0 - 2026-08-24 =
+* Removed: Email notifications feature (hidden since 2.5 for sites that never enabled it) has been fully removed
 
 = 2.12.1 - 2026-08-20 =
 * Tweak: Removed text domain loading method in favor of WordPress standard loading

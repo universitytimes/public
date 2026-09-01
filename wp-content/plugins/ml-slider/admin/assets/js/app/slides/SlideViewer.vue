@@ -198,6 +198,13 @@ export default {
                 }
             });
 
+            // Open the upgrade link (instead of switching tabs) when clicking the pro-ad lock icon on a tab title
+            $(".metaslider-ui").on('click', 'ul.tabs .is-pro-setting', function(event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                window.open($(this).data('href'), '_blank');
+            });
+
             // Event to switch tabs within a slide
             $(".metaslider-ui").on('click', 'ul.tabs > li > a', function(event) {
                 event.preventDefault();

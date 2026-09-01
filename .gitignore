@@ -65,3 +65,9 @@ Thumbs.db
 # --- Dependency directories, if you ever add build tooling ---
 node_modules/
 vendor/
+
+# Local pre-fix scratch backups — never track
+*.pre-fix-backup-*
+*-BACKUP-*
+*.bak
+*.orig

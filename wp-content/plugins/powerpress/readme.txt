@@ -3,8 +3,8 @@ Contributors: amandato, blubrry
 Tags: podcast, apple podcasts, podcast rss feed, spotify, podcast publishing
 Requires at least: 3.6
 Requires PHP: 5.2
-Tested up to: 7.0
-Stable tag: 11.17.7
+Tested up to: 7.1
+Stable tag: 11.17.9
 Donate link: https://blubrry.com/services/podcast-hosting/
 License: GPLv2 or later
 
@@ -164,6 +164,14 @@ If you are a fan of PowerPress, we would greatly appreciate it if you could take
 
 
 == Changelog ==
+
+= 11.17.9 =
+* Add user network management
+* Update network sync
+
+= 11.17.8 =
+* Additional error store cleanup
+* Fix media select compatibility error
 
 = 11.17.7 =
 * Fix channel level donation visibility

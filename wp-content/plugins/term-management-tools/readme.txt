@@ -1,16 +1,16 @@
-=== Term Management Tools ===
+=== Term Management Tools  ===
 Contributors: theMikeD, scribu
-Tags: admin, category, tag, term, taxonomy, hierarchy, organize, manage, merge, change, parent, child
+Tags: admin, category, tag, term, taxonomy
 Requires at least: 4.2
-Tested up to: 5.6
-Stable tag: 2.0.1
+Tested up to: 6.9
+Stable tag: 2.0.2
+Requires PHP: 7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Requires PHP: 7.1
 
-Allows you to merge terms, move terms between taxonomies, and set term parents, individually or in bulk. WPML is supported when changing taxonomies.
+Allows you to merge terms, move terms between taxonomies, and set term parents, individually or in bulk.
 
-== Description ==
+== Description  ==
 
 _Please note this plugin requires at least PHP 7.1._
 
@@ -22,7 +22,7 @@ If you need to reorganize your tags and categories, this plugin will make it eas
 
 It works with tags, categories and [custom taxonomies](http://codex.wordpress.org/Custom_Taxonomies).
 
-== Usage ==
+== Usage  ==
 
 1. Go to the taxonomy page containing terms you want to modify. For example, for categories go to `WP-Admin → Posts → Categories`.
 2. Select the terms you want to reorganize
@@ -41,7 +41,7 @@ Limited support is handled in the forum created for this purpose (see the [suppo
 
 Find a problem? Fixes can be submitted on [Github](https://github.com/theMikeD/wp-term-management-tools).
 
-== Installation ==
+== Installation  ==
 
 Either use the WordPress Plugin Installer (Dashboard → Plugins → Add New, then search for "term management tools"), or manually as follows:
 
@@ -61,13 +61,17 @@ Use the upgrade link in the Dashboard (Dashboard → Updates) to upgrade this pl
 == Notes ==
 Initial version of this plugin was by [scribu](http://scribu.net/), with contributions from others. See full code history on [Github](https://github.com/theMikeD/wp-term-management-tools).
 
-== Screenshots ==
+== Screenshots  ==
 
 1. Set Parent option. In this case, the term "New EN" will be set as a child of "Parent One EN"
 2. Merge option. Here, the two selected terms will be merged into a new term named "Merged." In addition, because both source terms share the same parent term ("Parent One EN"), the new term will also have "Parent One EN" as its parent term.
 3. Change Taxonomy option. Here, the "Parent One EN" category will be sent to the custom taxonomy "Hierarchical" (which I added for the sake of testing). A few other things to note here. First, the two child terms will also be moved and, because the target taxonomy is also hierarchical the parent-child relationships will be preserved. Second, if there are any WPML translations of these terms, they will also be moved and the translations maintained.
 
-== Changelog ==
+== Changelog  ==
+
+= 2.0.2 =
+* Confirmed php suppoprt up to php8.4
+* Confirmed WordPress support up to v6.9
 
 = 2.0.1 =
 * FIX: a WPML translation that only exists in a single site non-primary language was not being migrated correctly
@@ -97,17 +101,17 @@ Initial version of this plugin was by [scribu](http://scribu.net/), with contrib
 = 1.1.3 =
 * preserve term hierarchy when switching taxonomies. props Chris Caller
 
-= 1.1.2 =
+= 1.1.2  =
 * added 'term_management_tools_term_merged' action hook. props Amit Gupta
 
-= 1.1.1 =
+= 1.1.1  =
 * fixed error notices
 * added Persian translation
 
-= 1.1 =
+= 1.1  =
 * added 'Change taxonomy' action
 
-= 1.0 =
+= 1.0  =
 * initial release
 * [more info](http://scribu.net/wordpress/term-management-tools/tmt-1-0.html)
 

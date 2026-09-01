@@ -352,27 +352,8 @@ export default {
 												}
 											});
 
-											let $ = window.jQuery
 											setTimeout(() => {
-												$('.tox-dialog-wrap .colorpicker').each(function() {
-													$(this).wpColorPicker({
-														change: function(event, ui) {
-															var input = $(this).parents('.wp-picker-container').find('input.colorpicker');
-															var btn = $(this).parents('.wp-picker-container').find('button.wp-color-result');
-
-															btn.css('background-color',ui.color.toCSS('rgba'));
-
-															input.data('new-color',ui.color.toCSS('rgba'));
-															input.attr('value',ui.color.toCSS('rgba'));
-															input.val(ui.color.toCSS('rgba'));
-														}
-													}).promise().done(function() {
-														if (text) {
-															$(this).parents('.wp-picker-container').find('.iris-strip').eq(0).prepend(`<span class="ms-color-tooltip">${text.tone}</span>`);
-															$(this).parents('.wp-picker-container').find('.iris-strip').eq(1).prepend(`<span class="ms-color-tooltip">${text.opacity}</span>`);
-														}
-													});
-												});
+												window.metaslider.init_color_picker('.tox-dialog-wrap .colorpicker', text);
 											}, 100);
 										}
 									});

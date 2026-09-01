@@ -133,7 +133,7 @@ function metaslider_user_is_ready_for_notices()
         'post_status' => 'publish',
         'suppress_filters' => 1, // wpml, ignore language filter
         'order' => 'ASC',
-        'posts_per_page' => -1
+        'posts_per_page' => 1
     );
 
     // If no slideshows, don't show a notice
@@ -197,6 +197,7 @@ function metaslider_has_trashed_slides($slider_id)
         'post_type' => array('attachment', 'ml-slide'),
         'post_status' => array('trash'),
         'lang' => '',
+        // phpcs:ignore WordPressVIPMinimum.Performance.NoPaging.posts_per_page_posts_per_page
         'posts_per_page' => -1,
         'tax_query' => array(
             array(

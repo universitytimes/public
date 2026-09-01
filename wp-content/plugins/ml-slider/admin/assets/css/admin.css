@@ -902,6 +902,10 @@ eventually be removed/refactored */
     opacity: 1;
 }
 
+#adminmenu .toplevel_page_metaslider .wp-menu-image.svg {
+    background-size: 30px auto;
+}
+
 .metaslider-ui, .metaslider-ui * {
     box-sizing: border-box;
 }
@@ -1518,6 +1522,7 @@ input.no_last_pass {
 }
 .thumb-logo {
     padding: 10px;
+    height: 100%;
 }
 .default-thumb {
 	width: 70%;
@@ -1877,6 +1882,32 @@ input.no_last_pass {
 	padding: 5px 8px !important;
 }
 
+tr.mobile_number td:last-child {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 8px;
+}
+.mobile-number-wrap {
+	background: transparent;
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+	vertical-align: top;
+}
+.mobile-number-wrap .dashicons {
+	font-size: 1.5rem !important;
+	width: 1.5rem;
+	height: 1.5rem;
+	color: #50575e;
+	opacity: 1 !important;
+}
+.mobile-number-wrap input[type="number"] {
+	width: 43px;
+	padding: 0 6px;
+	margin-top: 5px;
+}
+
 /* Settngs & Help Page */
 .ms-settings-row > .ms-settings-col:not(:last-child) button {
 	display: none !important;
@@ -1906,6 +1937,12 @@ input.no_last_pass {
 }
 #dashboard-settings form select {
 	width: 200px !important;
+}
+#external-media-settings label {
+	font-size: 16px !important;
+}
+#external-media-settings select {
+	font-size: 14px !important;
 }
 /* Comparison Chart */
 #comparison-chart {
@@ -2334,6 +2371,17 @@ td .dot.available {
     background: #007cba;
 }
 
+.metaslider ul.tabs .is-pro-setting {
+    width: auto;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+.metaslider ul.tabs li a.has-pro-ad {
+    padding-bottom: 2px;
+}
+
 .metaslider-ui .metaslider-slides-container .slide.slide-is-hidden td > *:not(.metaslider-ui-controls) {
 	opacity: .2;
 }
@@ -2743,4 +2791,12 @@ td .dot.available {
     border-radius: 2px;
     pointer-events: none;
     z-index: 1;
+}
+
+.slideshow_page_metaslider-start #wpbody-content {
+  background-color: #f0f0f1;
+}
+
+.media-modal-content .media-frame-title h1 {
+    margin-bottom: 0 !important;
 }
