@@ -8,6 +8,13 @@
 
 require '../../../wp-load.php';
 
+if ( ! is_user_logged_in()
+     || ! current_user_can( 'manage_options' )
+     || ! isset( $_POST['ut_order_posts_nonce'] )
+     || ! wp_verify_nonce( $_POST['ut_order_posts_nonce'], 'ut_order_posts' ) ) {
+    wp_die( 'Unauthorized', 'Unauthorized', array( 'response' => 403 ) );
+}
+
 
 													$option = 'post1';
 	      

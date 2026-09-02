@@ -1767,7 +1767,8 @@ window.onload = function() {
 
 
 
-<form method="post" action="<?php get_site_url(); ?>/wp/wp-content/themes/universitytimes/form-order.php">
+<form method="post" action="<?php echo get_stylesheet_directory_uri(); ?>/form-order.php">
+<?php wp_nonce_field( 'ut_order_posts', 'ut_order_posts_nonce' ); ?>
 
 
 
@@ -2035,7 +2036,8 @@ window.onload = function() {
         </form>
 
 
-        <form method="post" action="<?php get_site_url(); ?>/wp/wp-content/themes/universitytimes/form-order-clear.php">
+        <form method="post" action="<?php echo get_stylesheet_directory_uri(); ?>/form-order-clear.php">
+<?php wp_nonce_field( 'ut_order_posts', 'ut_order_posts_nonce' ); ?>
 
 
 
@@ -2064,7 +2066,8 @@ window.onload = function() {
 
 
 
-  <form method="post" action="form-order.php">
+  <form method="post" action="<?php echo get_stylesheet_directory_uri(); ?>/form-order.php">
+<?php wp_nonce_field( 'ut_order_posts', 'ut_order_posts_nonce' ); ?>
 
 
 
