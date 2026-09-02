@@ -360,7 +360,7 @@
                <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
                <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
                <link href="//fonts.googleapis.com/css?family=PT+Serif:400italic,400,700italic,700" rel="stylesheet" type="text/css">
-               <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
+               <link href='//fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
                <link href='https://fonts.googleapis.com/css?family=Martel:900' rel='stylesheet' type='text/css'>
             </head>
             <body <?php body_class(); ?>>
