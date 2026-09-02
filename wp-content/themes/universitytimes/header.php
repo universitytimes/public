@@ -346,7 +346,6 @@
                <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" />
                <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
                <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.js"></script>
-               <script src="//cdnjs.cloudflare.com/ajax/libs/ember.js/1.6.1/ember.min.js"></script>
                <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/2.1.0/jquery.imagesloaded.min.js"></script>
                <script src="<?php echo home_url(); ?>/wp-content/themes/universitytimes/javascript/jquery-imagefill.js"></script>
                <script src="<?php echo home_url(); ?>/wp-content/themes/universitytimes/javascript/jquery.waypoints.js"></script>
