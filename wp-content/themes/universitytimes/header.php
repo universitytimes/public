@@ -690,6 +690,8 @@
                                                          <?php
                                                             //Output the trainer email
                                                              
+                                                   $content_meta_display = '';
+
                                                             echo $content_meta_display;
                                                             
                                                             
@@ -814,6 +816,8 @@
                                                          <?php
                                                             //Output the trainer email
                                                              
+                                                   $content_meta_display = '';
+
                                                             echo $content_meta_display;
                                                             ?>
                                                       </h4>

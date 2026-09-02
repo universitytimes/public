@@ -2738,6 +2738,8 @@ if ( $my_query->have_posts() ) : ?>
 																      $post_age_in_minutes = $post_age/60;	
 																      
 																      $columnhours = 48;
+
+									      $layouttype = '';
 													
 						
 						
@@ -3110,6 +3112,10 @@ if ( $my_query->have_posts() ) : ?>
 								      $post_age_in_minutes = $post_age/60;	
 								      
 								      $opedhours = 48;
+
+					      $layouttype = '';
+
+					      $writerno = 0;
 								
 								
 								
