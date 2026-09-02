@@ -100,85 +100,10 @@
 														 
 														 
 									<?php				
-													 
-													 
 											$permalink = get_permalink();		 
-													 
-								$facebookurl = "http://api.facebook.com/restserver.php?method=links.getStats&urls=" . $permalink;
-											
-								$facebookurl2 = "http://api.facebook.com/restserver.php?method=links.getStats&urls=" . "http://universitytimes.ie/?p=" . get_the_ID();
-								
-								$facebookurl3 = "http://api.facebook.com/restserver.php?method=links.getStats&urls=" . "https://www.universitytimes.ie/?p=" . get_the_ID();
-											
-											
-											
 											$headline = rawurlencode(get_the_title());
-											
 											$tweettext = $headline .'%20'.$permalink.'%20via%20%40universitytimes';
-											
 								$twitterurl = "https://twitter.com/home?status=" . $tweettext;
-								
-								 
-											
-											
-											$twitterdataurl = "http://cdn.api.twitter.com/1/urls/count.json?url=".$permalink;
-											
-											$twitterdataurl2 = "http://cdn.api.twitter.com/1/urls/count.json?url=" . "http://universitytimes.ie/?p=" . get_the_ID();
-											
-											$twitterdataurl3 = "http://cdn.api.twitter.com/1/urls/count.json?url=" . "https://www.universitytimes.ie/?p=" . get_the_ID();
-										
-											
-											$twitterdata = file_get_contents($twitterdataurl);
-						// convert the string to a json object
-						$decodedtwitter = json_decode($twitterdata);
-						// read the title value
-						$twitter_total_count = $decodedtwitter->count;
-						// copy the posts array to a php var
-						
-						
-						
-						
-											$twitterdata2 = file_get_contents($twitterdataurl2);
-						// convert the string to a json object
-						$decodedtwitter2 = json_decode($twitterdata2);
-						// read the title value
-						$twitter_total_count2 = $decodedtwitter2->count;
-						// copy the posts array to a php var
-						
-											$twitterdata3 = file_get_contents($twitterdataurl3);
-						// convert the string to a json object
-						$decodedtwitter3 = json_decode($twitterdata2);
-						// read the title value
-						$twitter_total_count3 = $decodedtwitter3->count;
-						// copy the posts array to a php var
-
-						
-						
-											
-							$twitter_total_count = $twitter_total_count + $twitter_total_count2 + $twitter_total_count3;			
-																				 
-													 
-						   $facebookdata = simplexml_load_file($facebookurl);
-						
-						 $facebook_total_engagement = $facebookdata->link_stat->total_count;
-						 
-						 
-						 $facebookdata2 = simplexml_load_file($facebookurl2);
-						
-						 $facebook_total_engagement2 = $facebookdata2->link_stat->total_count;
-						
-						
-						
-						$facebookdata3 = simplexml_load_file($facebookurl3);
-						
-						 $facebook_total_engagement3 = $facebookdata3->link_stat->total_count;
-						
-						$facebook_total_engagement = $facebook_total_engagement + $facebook_total_engagement2 + $facebook_total_engagement3;
-						
-						
-													 							 
-													 
-													 
 													 ?>
 													 
 													 
@@ -305,9 +230,9 @@ jQuery(window).trigger('resize');
 
 						<div class="sharebuttonsblock">
 				
-							<a href="https://www.facebook.com/sharer/sharer.php?u=<?php the_permalink(); ?>" class="facebookshare popup"><?php if($facebook_total_engagement != "0"){ echo $facebook_total_engagement; }?></a>
+							<a href="https://www.facebook.com/sharer/sharer.php?u=<?php the_permalink(); ?>" class="facebookshare popup"></a>
                   
-							<a href="<?php echo $twitterurl; ?>" class="twittershare popup"><?php if($twitter_total_count > 0){echo $twitter_total_count;} ?></a>
+							<a href="<?php echo $twitterurl; ?>" class="twittershare popup"></a>
                   
 							<a href="mailto:?subject=The University Times &ndash; <?php echo get_the_title(); ?>&amp;body=<?php if(function_exists("the_subtitle")) {
 										
