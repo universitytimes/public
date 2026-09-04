@@ -5956,6 +5956,11 @@ add_action( 'after_switch_theme', 'my_rewrite_flush' );
 
 function my_ajax_order_more() {
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
+
 	$ajax_page_no = $_POST['page_no'];
 	$postsperpage = 10;
 	$current_post_order_list_option = get_option("ut_post_order_list_3");
@@ -6034,6 +6039,11 @@ function my_ajax_order_more() {
 
 function my_ajax_clear_order() {
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
+
 	
 	update_option("ut_post_order_list_3", "");
 	
@@ -6049,6 +6059,11 @@ function my_ajax_clear_order() {
 add_action( 'wp_ajax_ajax_postorder_form_submit', 'my_ajax_postorder_form_submit');
 
 function my_ajax_postorder_form_submit() {
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
 		
 	echo "<br/><h4>NEW REQUEST</h4><br/><br/>";
 	
@@ -6452,6 +6467,7 @@ $the_query = new WP_Query( $args ); ?>
 			        type: 'post',
 			        data: {
 			        action: 'ajax_order_more',
+			        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
 			        
 			        page_no:  pageno,
 			        },
@@ -6503,6 +6519,7 @@ $the_query = new WP_Query( $args ); ?>
         type: 'post',
         data: {
         action: 'ajax_clear_order',
+        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
         },
     success: function( html ) {
        // jQuery('#listofposts').append( html );
@@ -6538,6 +6555,7 @@ $the_query = new WP_Query( $args ); ?>
         type: 'post',
         data: {
         action: 'ajax_postorder_form_submit',
+        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
         form: jQuery('#postlist, #current_orderpostlist').serialize(),
         
         },
@@ -6656,6 +6674,11 @@ function functionsfrontpage()
 
 function my_ajax_order_more_freshers() {
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
+
 	$ajax_page_no = $_POST['page_no'];
 	$postsperpage = 10;
 	$current_post_order_freshers_list_option = get_option("ut_post_order_freshers_list_3");
@@ -6734,6 +6757,11 @@ function my_ajax_order_more_freshers() {
 
 function my_ajax_clear_order_freshers() {
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
+
 	
 	update_option("ut_post_order_freshers_list_3", "");
 	
@@ -6749,6 +6777,11 @@ function my_ajax_clear_order_freshers() {
 add_action( 'wp_ajax_ajax_postorder_freshers_form_submit', 'my_ajax_postorder_freshers_form_submit');
 
 function my_ajax_postorder_freshers_form_submit() {
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+	check_ajax_referer( 'ut_ajax_postorder', 'nonce' );
 		
 	echo "<br/><h4>NEW REQUEST</h4><br/><br/>";
 	
@@ -7152,6 +7185,7 @@ $the_query = new WP_Query( $args ); ?>
 			        type: 'post',
 			        data: {
 			        action: 'ajax_order_more_freshers',
+			        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
 			        
 			        page_no:  pageno,
 			        },
@@ -7203,6 +7237,7 @@ $the_query = new WP_Query( $args ); ?>
         type: 'post',
         data: {
         action: 'ajax_clear_order_freshers',
+        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
         },
     success: function( html ) {
        // jQuery('#listofposts').append( html );
@@ -7238,6 +7273,7 @@ $the_query = new WP_Query( $args ); ?>
         type: 'post',
         data: {
         action: 'ajax_postorder_freshers_form_submit',
+        nonce: '<?php echo wp_create_nonce( "ut_ajax_postorder" ); ?>',
         form: jQuery('#postlist, #current_orderpostlist').serialize(),
         
         },
